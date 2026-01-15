@@ -1,0 +1,51 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.18;
+import "./MasterContract.sol";
+import "@openzeppelin/contracts/proxy/Clones.sol";
+
+contract CampaignProxyFactory{
+    address public immutable implementation;
+    address[] private  compaigns; // List of deployed Campaign contracts
+    mapping (address => address[]) compaignsOf;
+
+    constructor(address _implementation) {
+        implementation = _implementation;
+    }
+
+    event CompaignCreated(address indexed compaign, address indexed creator , uint256 goal, uint256 deadline);
+
+    // create compaigns
+    function createClone(uint256 goal,uint256 durationSeconds, uint256 tokensPerEth , address tokenAdress) public {
+        address newClone = Clones.clone(implementation);
+        CrowdFundingMaster(newClone).initialize(msg.sender, goal,durationSeconds , tokenAdress , tokensPerEth);
+        compaigns.push(address(newClone)); // add into List of deployed contracts
+        compaignsOf[msg.sender].push(address(newClone)); // add into mapping of ownership
+        emit CompaignCreated(address(newClone), msg.sender, goal, block.timestamp + durationSeconds); // emit the event
+    }
+   
+
+    function getAllCampaigns() public view returns (address[] memory) {
+        return compaigns;
+    }
+
+    function getCompaignsOf(address creator) public view returns (address[] memory){
+        return compaignsOf[creator];
+    }
+
+    function compaignsCount() public view returns (uint256) {
+        return compaigns.length;
+    }
+
+    function getRecent(uint256 n) public view returns (address[] memory) {
+        uint arrayLength = compaigns.length;
+        uint startIndex = arrayLength - n;
+        address[] memory result = new address[](n);
+        uint count = 0;
+        for (uint i = startIndex; i < arrayLength; i++) 
+        {
+            result[count] = compaigns[i];
+            count++;
+        }
+        return result;
+    }
+}
