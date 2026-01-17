@@ -1,0 +1,4 @@
+-- Token contract code :  Please Refer File : context/Sample Contracts/KarmaToken.txt
+-- Deplyment script : I directly Deployed From Remix IDE
+-- Address of Deployed Token Contract : 0xbb8b0c3ff7b93b308a5630e1d702ece9ff758b1c
+-- etherScan Link : https://sepolia.etherscan.io/token/0xbb8b0c3ff7b93b308a5630e1d702ece9ff758b1c#code
