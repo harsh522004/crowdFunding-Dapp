@@ -21,7 +21,7 @@ async function main(){
     const tokenContract = await ethers.deployContract("Karma");
     await tokenContract.waitForDeployment();
     const address : string = await tokenContract.getAddress();
-    console.log(`Deplyed Master contract at : ${address}`);
+    console.log(`Deplyed Token contract at : ${address}`);
 }
 
 main()

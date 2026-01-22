@@ -19,6 +19,15 @@ async function displayInfo (){
     console.log(`Account balance: ${ethers.formatEther(balance)} ETH`);
 }
 
+async function deployToken(): Promise<string>{
+    const tokenContract = await ethers.deployContract("Karma");
+    await tokenContract.waitForDeployment();
+    const address : string = await tokenContract.getAddress();
+    console.log(`Deplyed Token contract at : ${address}`);
+    return address;
+}
+
+
 // Function to deploy Master contract
 async function deployMaster(): Promise<string>{
     const masterContract = await ethers.deployContract("CrowdFundingMaster");
@@ -47,9 +56,11 @@ async function deployFactory(masterContractAddress : string) : Promise<string>{
 async function main(){
     
     await displayInfo();
+    const tokenAddress : string = await deployToken();
     const masterAddress : string = await deployMaster();
     const factoryAddress : string = await deployFactory(masterAddress);
     console.log("\n=== Deployment Complete ===");
+    console.log(`Token:   ${tokenAddress}`);
     console.log(`Master:  ${masterAddress}`);
     console.log(`Factory: ${factoryAddress}`);
     console.log(`Network: ${networkName}`);
