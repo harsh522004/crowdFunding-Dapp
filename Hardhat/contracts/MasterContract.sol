@@ -58,9 +58,7 @@ contract CrowdFundingMaster is Initializable, OwnableUpgradeable {
     event Contributed(
         address indexed contributor,
         uint256 amount,
-        uint256 newTotal,
-        bool IsSucess,
-        uint256 tokenReward
+        uint256 newTotal
     ); // when someone contribute
     event Withdrawn(address indexed creator, uint256 amount);
     event Refund(address indexed banker, uint256 amount);
@@ -164,9 +162,7 @@ contract CrowdFundingMaster is Initializable, OwnableUpgradeable {
         emit Contributed(
             msg.sender,
             msg.value,
-            compaign.totalRaised,
-            isSuccess,
-            tokenReward
+            compaign.totalRaised
         ); // mit the event
     }
 
@@ -195,9 +191,10 @@ contract CrowdFundingMaster is Initializable, OwnableUpgradeable {
             compaign.totalRaised > 0 && !isWithdrawn,
             "Withdrawn is not possible!"
         );
+        isWithdrawn = true;
+        compaign.state = State.Withdrawn;
         (bool success, ) = msg.sender.call{value: compaign.totalRaised}("");
         require(success, "ETH withdrawal failed!");
-        isWithdrawn = true;
         emit Withdrawn(msg.sender, compaign.totalRaised);
     }
 
