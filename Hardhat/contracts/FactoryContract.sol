@@ -2,14 +2,19 @@
 pragma solidity ^0.8.18;
 import "./MasterContract.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract CampaignProxyFactory {
     address public immutable implementation;
+    address public adminAddress;
+    IERC20 public token;
     address[] private compaigns; // List of deployed Campaign contracts
     mapping(address => address[]) compaignsOf;
-
-    constructor(address _implementation) {
+    mapping(address => bool) public isClone;
+    constructor(address _implementation, address _tokenAddress) {
         implementation = _implementation;
+        token = IERC20(_tokenAddress);
+        adminAddress = msg.sender;
     }
 
     event CompaignCreated(
@@ -23,19 +28,19 @@ contract CampaignProxyFactory {
     function createClone(
         uint256 goal,
         uint256 durationSeconds,
-        uint256 tokensPerEth,
-        address tokenAdress
+        uint256 tokensPerEth
     ) public {
         address newClone = Clones.clone(implementation);
         CrowdFundingMaster(newClone).initialize(
             msg.sender,
             goal,
             durationSeconds,
-            tokenAdress,
-            tokensPerEth
+            tokensPerEth,
+            address(this)
         );
         compaigns.push(address(newClone)); // add into List of deployed contracts
         compaignsOf[msg.sender].push(address(newClone)); // add into mapping of ownership
+        isClone[address(newClone)] = true;
         emit CompaignCreated(
             address(newClone),
             msg.sender,
@@ -68,5 +73,9 @@ contract CampaignProxyFactory {
             count++;
         }
         return result;
+    }
+    function distributeTokens(address _to, uint256 _amount) public {
+        require(isClone[msg.sender], "Only official clones can distribute");
+        token.transferFrom(adminAddress, _to, _amount);
     }
 }

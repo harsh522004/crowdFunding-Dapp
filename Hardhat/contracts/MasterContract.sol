@@ -3,9 +3,11 @@ pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
+interface ICampaignProxyFactory {
+    function distributeReward(address _to, uint256 _amount) external;
+}
 contract CrowdFundingMaster is Initializable, OwnableUpgradeable {
+    address public factoryAddress;
     // state of Compaign
     enum State {
         Funding,
@@ -27,15 +29,14 @@ contract CrowdFundingMaster is Initializable, OwnableUpgradeable {
     // Data state
     Compaign compaign;
     bool isWithdrawn = false;
-    IERC20 public token;
     uint256 public rewardRate;
 
     function initialize(
         address creator,
         uint256 goal,
         uint256 durationSeconds,
-        address _tokenAdress,
-        uint256 _tokensPerEth
+        uint256 _tokensPerEth,
+        address _factoryAddress
     ) public initializer {
         __Ownable_init(creator);
         compaign.creator = creator;
@@ -43,8 +44,8 @@ contract CrowdFundingMaster is Initializable, OwnableUpgradeable {
         compaign.deadline = block.timestamp + durationSeconds;
         compaign.totalRaised = 0;
         compaign.state = State.Funding;
-        token = IERC20(_tokenAdress);
         rewardRate = _tokensPerEth;
+        factoryAddress = _factoryAddress;
 
         emit CampaignCreated(compaign.creator, goal, compaign.deadline);
     }
@@ -74,7 +75,6 @@ contract CrowdFundingMaster is Initializable, OwnableUpgradeable {
             uint256 totalRaised,
             State state,
             bool withdrawn,
-            address tokenAddress,
             uint256 rewardPerEth
         )
     {
@@ -84,7 +84,6 @@ contract CrowdFundingMaster is Initializable, OwnableUpgradeable {
         totalRaised = compaign.totalRaised;
         state = compaign.state;
         withdrawn = isWithdrawn;
-        tokenAddress = address(token);
         rewardPerEth = rewardRate;
     }
 
@@ -129,11 +128,6 @@ contract CrowdFundingMaster is Initializable, OwnableUpgradeable {
         return block.timestamp >= compaign.deadline;
     }
 
-    // Token allowance helper
-    function checkCreatorAllowance() external view returns (uint256) {
-        return token.allowance(owner(), address(this));
-    }
-
     function getRecommendedAllowance() external view returns (uint256) {
         // Goal in ETH * tokens per ETH
         return (compaign.goal * rewardRate) / 1 ether;
@@ -156,14 +150,14 @@ contract CrowdFundingMaster is Initializable, OwnableUpgradeable {
 
         // token reward calculation
         uint256 tokenReward = ((msg.value * 10 ** 18) * (rewardRate)) / 1 ether;
-        token.transferFrom(owner(), msg.sender, tokenReward); // sending token from owner to contributor
+        // Factory Function call here to distribute Token
+        ICampaignProxyFactory(factoryAddress).distributeReward(
+            msg.sender,
+            tokenReward
+        );
         bool isSuccess = compaign.totalRaised >= compaign.goal;
         if (isSuccess) compaign.state = State.Successful;
-        emit Contributed(
-            msg.sender,
-            msg.value,
-            compaign.totalRaised
-        ); // mit the event
+        emit Contributed(msg.sender, msg.value, compaign.totalRaised); // mit the event
     }
 
     // Finalize the state of contract
