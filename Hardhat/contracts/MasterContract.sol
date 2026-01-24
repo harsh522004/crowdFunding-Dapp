@@ -4,7 +4,7 @@ pragma solidity ^0.8.18;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 interface ICampaignProxyFactory {
-    function distributeReward(address _to, uint256 _amount) external;
+    function distributeTokens(address _to, uint256 _amount) external;
 }
 contract CrowdFundingMaster is Initializable, OwnableUpgradeable {
     address public factoryAddress;
@@ -151,7 +151,7 @@ contract CrowdFundingMaster is Initializable, OwnableUpgradeable {
         // token reward calculation
         uint256 tokenReward = ((msg.value * 10 ** 18) * (rewardRate)) / 1 ether;
         // Factory Function call here to distribute Token
-        ICampaignProxyFactory(factoryAddress).distributeReward(
+        ICampaignProxyFactory(factoryAddress).distributeTokens(
             msg.sender,
             tokenReward
         );

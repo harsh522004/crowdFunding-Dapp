@@ -8,8 +8,8 @@ contract CampaignProxyFactory {
     address public immutable implementation;
     address public adminAddress;
     IERC20 public token;
-    address[] private compaigns; // List of deployed Campaign contracts
-    mapping(address => address[]) compaignsOf;
+    address[] private campaigns; // List of deployed Campaign contracts
+    mapping(address => address[]) campaignsOf;
     mapping(address => bool) public isClone;
     constructor(address _implementation, address _tokenAddress) {
         implementation = _implementation;
@@ -17,7 +17,7 @@ contract CampaignProxyFactory {
         adminAddress = msg.sender;
     }
 
-    event CompaignCreated(
+    event CampaignCreated(
         address indexed compaign,
         address indexed creator,
         uint256 goal,
@@ -38,10 +38,10 @@ contract CampaignProxyFactory {
             tokensPerEth,
             address(this)
         );
-        compaigns.push(address(newClone)); // add into List of deployed contracts
-        compaignsOf[msg.sender].push(address(newClone)); // add into mapping of ownership
+        campaigns.push(address(newClone)); // add into List of deployed contracts
+        campaignsOf[msg.sender].push(address(newClone)); // add into mapping of ownership
         isClone[address(newClone)] = true;
-        emit CompaignCreated(
+        emit CampaignCreated(
             address(newClone),
             msg.sender,
             goal,
@@ -50,26 +50,26 @@ contract CampaignProxyFactory {
     }
 
     function getAllCampaigns() public view returns (address[] memory) {
-        return compaigns;
+        return campaigns;
     }
 
-    function getCompaignsOf(
+    function getCampaignsOf(
         address creator
     ) public view returns (address[] memory) {
-        return compaignsOf[creator];
+        return campaignsOf[creator];
     }
 
-    function compaignsCount() public view returns (uint256) {
-        return compaigns.length;
+    function campaignsCount() public view returns (uint256) {
+        return campaigns.length;
     }
 
     function getRecent(uint256 n) public view returns (address[] memory) {
-        uint arrayLength = compaigns.length;
+        uint arrayLength = campaigns.length;
         uint startIndex = arrayLength - n;
         address[] memory result = new address[](n);
         uint count = 0;
         for (uint i = startIndex; i < arrayLength; i++) {
-            result[count] = compaigns[i];
+            result[count] = campaigns[i];
             count++;
         }
         return result;
