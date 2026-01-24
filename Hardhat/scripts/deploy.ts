@@ -42,8 +42,8 @@ async function deployMaster(): Promise<string>{
 }
 
 // Function to deploy Factory contract
-async function deployFactory(masterContractAddress : string) : Promise<string>{
-  const factoryContract = await ethers.deployContract("CampaignProxyFactory",[masterContractAddress]);
+async function deployFactory(masterContractAddress : string, tokenAddress: string) : Promise<string>{
+  const factoryContract = await ethers.deployContract("CampaignProxyFactory",[masterContractAddress, tokenAddress]);
   await factoryContract.waitForDeployment();
   const address: string = await factoryContract.getAddress();
   console.log(`Deplyed Factory contract at : ${address}`);
@@ -58,7 +58,7 @@ async function main(){
     await displayInfo();
     const tokenAddress : string = await deployToken();
     const masterAddress : string = await deployMaster();
-    const factoryAddress : string = await deployFactory(masterAddress);
+    const factoryAddress : string = await deployFactory(masterAddress,tokenAddress);
     console.log("\n=== Deployment Complete ===");
     console.log(`Token:   ${tokenAddress}`);
     console.log(`Master:  ${masterAddress}`);

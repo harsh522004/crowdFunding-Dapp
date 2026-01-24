@@ -11,6 +11,7 @@ contract CampaignProxyFactory {
     address[] private campaigns; // List of deployed Campaign contracts
     mapping(address => address[]) campaignsOf;
     mapping(address => bool) public isClone;
+
     constructor(address _implementation, address _tokenAddress) {
         implementation = _implementation;
         token = IERC20(_tokenAddress);
