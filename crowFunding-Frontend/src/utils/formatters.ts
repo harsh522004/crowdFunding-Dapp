@@ -1,3 +1,12 @@
+// Enum for campaign states
+export const StateEnum = {
+    Funding : 0,
+    Successful : 1,
+    Failed : 2,
+    Withdrawn :3
+} ;
+// Type for campaign states
+export type StateEnumType = typeof StateEnum[keyof typeof StateEnum];
 // fuction to shorten addresses
 export const shortenAddress = (address: string): string => {
   if (address.length < 10) return address;
@@ -33,21 +42,13 @@ export const calculateProgressPercentage = (raisedWei: string, goalWei: string):
     const percentage = (raised * BigInt(100)) / goal;
     return Number(percentage);
 }
-// Enum for campaign states
-export const StateEnum = {
-    Funding : 0,
-    Successful : 1,
-    Failed : 2,
-    Withdrawn :3
-} ;
-// Type for campaign states
-export type StateEnumType = typeof StateEnum[keyof typeof StateEnum];
+
 // function to get enum value from string
 export const getStateEnumValue = (state: string): StateEnumType | null => {
     switch(state) {
         case 'Funding': return StateEnum.Funding;
         case 'Successful': return StateEnum.Successful;
-        case 'Failed': return StateEnum.Failed;     
+        case 'Failed': return StateEnum.Failed;
         case 'Withdrawn': return StateEnum.Withdrawn;
         default: return null;
     }
