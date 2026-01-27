@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 // Form which allows users to create a new campaign with goal in ETH, Duration in days and Reward Rate PER ETH with Require validation
 function CreateCampaignPage() {
@@ -6,6 +7,7 @@ function CreateCampaignPage() {
   const [goal, setGoal] = useState('');
   const [duration, setDuration] = useState('');
   const [tokensPerEth, setTokensPerEth] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Error state
   const [errors, setErrors] = useState({
@@ -62,28 +64,39 @@ function CreateCampaignPage() {
   };
 
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (validateForm()) {
+      setIsSubmitting(true);
+
+      // Simulate transaction delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
       // TODO: In Phase 5, we'll call the smart contract here
       console.log('Form is valid! Creating campaign...');
       console.log({ goal, duration, tokensPerEth });
       alert(`Campaign Details:\nGoal: ${goal} ETH\nDuration: ${duration} days\nReward: ${tokensPerEth} tokens/ETH`);
+
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6 sm:py-8 lg:py-12">
         {/* Header */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-white mb-2">Create New Campaign</h2>
-          <p className="text-slate-400">Launch your project and start raising funds</p>
+        <div className="mb-8 animate-fadeIn">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">
+            Create New Campaign
+          </h2>
+          <p className="text-slate-400 text-sm sm:text-base">
+            Launch your project and start raising funds
+          </p>
         </div>
 
         {/* Form Card */}
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-2xl mx-auto animate-fadeIn">
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
 
@@ -204,9 +217,17 @@ function CreateCampaignPage() {
               <div className="pt-4">
                 <button
                   type="submit"
-                  className="w-full px-6 py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.02] active:scale-[0.98]"
+                  disabled={isSubmitting}
+                  className="w-full px-6 py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.02] active:scale-[0.98] disabled:scale-100 disabled:shadow-none flex items-center justify-center gap-2"
                 >
-                  Create Campaign
+                  {isSubmitting ? (
+                    <>
+                      <LoadingSpinner size="sm" color="white" />
+                      Creating Campaign...
+                    </>
+                  ) : (
+                    'Create Campaign'
+                  )}
                 </button>
                 <p className="mt-3 text-xs text-center text-slate-500">
                   Note: Wallet connection and blockchain integration coming in Phase 3 & 5
