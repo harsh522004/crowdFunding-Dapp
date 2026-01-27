@@ -1,9 +1,11 @@
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAccount } from 'wagmi';
 
 function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
+  const { address, isConnected } = useAccount();
   return (
     <header className="border-b border-slate-700 bg-slate-900/95 backdrop-blur-md sticky top-0 z-50 shadow-lg shadow-black/20">
       <div className="container mx-auto px-4 py-4">
@@ -22,8 +24,7 @@ function Header() {
               to="/"
               end
               className={({ isActive }) =>
-                `text-sm font-medium transition-colors hover:text-blue-400 ${
-                  isActive ? 'text-blue-400' : 'text-slate-300'
+                `text-sm font-medium transition-colors hover:text-blue-400 ${isActive ? 'text-blue-400' : 'text-slate-300'
                 }`
               }
             >
@@ -32,8 +33,7 @@ function Header() {
             <NavLink
               to="/create"
               className={({ isActive }) =>
-                `text-sm font-medium transition-colors hover:text-blue-400 ${
-                  isActive ? 'text-blue-400' : 'text-slate-300'
+                `text-sm font-medium transition-colors hover:text-blue-400 ${isActive ? 'text-blue-400' : 'text-slate-300'
                 }`
               }
             >
@@ -42,8 +42,7 @@ function Header() {
             <NavLink
               to="/my-campaigns"
               className={({ isActive }) =>
-                `text-sm font-medium transition-colors hover:text-blue-400 ${
-                  isActive ? 'text-blue-400' : 'text-slate-300'
+                `text-sm font-medium transition-colors hover:text-blue-400 ${isActive ? 'text-blue-400' : 'text-slate-300'
                 }`
               }
             >
@@ -52,9 +51,13 @@ function Header() {
           </nav>
 
           {/* Desktop Connect Wallet Button */}
-          <button className="hidden sm:block px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105">
-            Connect Wallet
-          </button>
+          <div className="hidden md:block">
+            <ConnectButton chainStatus="icon" />
+
+            {isConnected && (
+              <p>Connected wallet: {address}</p>
+            )}
+          </div>
 
           {/* Mobile Menu Button */}
           <button
@@ -79,10 +82,9 @@ function Header() {
                 end
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={({ isActive }) =>
-                  `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-blue-500/20 text-blue-400'
-                      : 'text-slate-300 hover:bg-slate-800'
+                  `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive
+                    ? 'bg-blue-500/20 text-blue-400'
+                    : 'text-slate-300 hover:bg-slate-800'
                   }`
                 }
               >
@@ -92,10 +94,9 @@ function Header() {
                 to="/create"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={({ isActive }) =>
-                  `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-blue-500/20 text-blue-400'
-                      : 'text-slate-300 hover:bg-slate-800'
+                  `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive
+                    ? 'bg-blue-500/20 text-blue-400'
+                    : 'text-slate-300 hover:bg-slate-800'
                   }`
                 }
               >
@@ -105,18 +106,17 @@ function Header() {
                 to="/my-campaigns"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={({ isActive }) =>
-                  `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-blue-500/20 text-blue-400'
-                      : 'text-slate-300 hover:bg-slate-800'
+                  `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive
+                    ? 'bg-blue-500/20 text-blue-400'
+                    : 'text-slate-300 hover:bg-slate-800'
                   }`
                 }
               >
                 My Campaigns
               </NavLink>
-              <button className="mt-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-medium rounded-lg transition-all duration-200">
-                Connect Wallet
-              </button>
+              <div className="px-4 py-2">
+                <ConnectButton chainStatus="icon" />
+              </div>
             </div>
           </nav>
         )}
