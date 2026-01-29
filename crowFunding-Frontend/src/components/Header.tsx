@@ -1,11 +1,10 @@
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount } from 'wagmi';
+
 
 function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { address, isConnected } = useAccount();
   return (
     <header className="border-b border-slate-700 bg-slate-900/95 backdrop-blur-md sticky top-0 z-50 shadow-lg shadow-black/20">
       <div className="container mx-auto px-4 py-4">
@@ -53,10 +52,6 @@ function Header() {
           {/* Desktop Connect Wallet Button */}
           <div className="hidden md:block">
             <ConnectButton chainStatus="icon" />
-
-            {isConnected && (
-              <p>Connected wallet: {address}</p>
-            )}
           </div>
 
           {/* Mobile Menu Button */}

@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useAccount } from 'wagmi';
 
 // Form which allows users to create a new campaign with goal in ETH, Duration in days and Reward Rate PER ETH with Require validation
 function CreateCampaignPage() {
+  const { isConnected } = useAccount();
+
   // Form state
   const [goal, setGoal] = useState('');
   const [duration, setDuration] = useState('');
@@ -113,9 +116,8 @@ function CreateCampaignPage() {
                     onChange={(e) => setGoal(e.target.value)}
                     placeholder="e.g., 10"
                     step="0.01"
-                    className={`w-full px-4 py-3 bg-slate-900/50 border ${
-                      errors.goal ? 'border-red-500' : 'border-slate-600'
-                    } rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
+                    className={`w-full px-4 py-3 bg-slate-900/50 border ${errors.goal ? 'border-red-500' : 'border-slate-600'
+                      } rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">
                     ETH
@@ -144,9 +146,8 @@ function CreateCampaignPage() {
                     onChange={(e) => setDuration(e.target.value)}
                     placeholder="e.g., 30"
                     step="1"
-                    className={`w-full px-4 py-3 bg-slate-900/50 border ${
-                      errors.duration ? 'border-red-500' : 'border-slate-600'
-                    } rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
+                    className={`w-full px-4 py-3 bg-slate-900/50 border ${errors.duration ? 'border-red-500' : 'border-slate-600'
+                      } rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">
                     Days
@@ -175,9 +176,8 @@ function CreateCampaignPage() {
                     onChange={(e) => setTokensPerEth(e.target.value)}
                     placeholder="e.g., 100"
                     step="1"
-                    className={`w-full px-4 py-3 bg-slate-900/50 border ${
-                      errors.tokensPerEth ? 'border-red-500' : 'border-slate-600'
-                    } rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
+                    className={`w-full px-4 py-3 bg-slate-900/50 border ${errors.tokensPerEth ? 'border-red-500' : 'border-slate-600'
+                      } rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">
                     Tokens/ETH
@@ -215,20 +215,33 @@ function CreateCampaignPage() {
 
               {/* Submit Button */}
               <div className="pt-4">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full px-6 py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.02] active:scale-[0.98] disabled:scale-100 disabled:shadow-none flex items-center justify-center gap-2"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <LoadingSpinner size="sm" color="white" />
-                      Creating Campaign...
-                    </>
+                {
+                  !isConnected ? (
+                    <p className="mb-4 text-center text-sm text-red-400">
+                      ⚠️ Please connect your wallet to create a campaign.
+                    </p>
                   ) : (
-                    'Create Campaign'
-                  )}
-                </button>
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full px-6 py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.02] active:scale-[0.98] disabled:scale-100 disabled:shadow-none flex items-center justify-center gap-2"
+                    >
+                      {
+                        isSubmitting ? (
+                          <>
+                            <LoadingSpinner size="sm" color="white" />
+                            Creating Campaign...
+                          </>
+                        ) : (
+                          'Create Campaign'
+                        )
+
+                      }
+
+                    </button>
+                  )
+                }
+
                 <p className="mt-3 text-xs text-center text-slate-500">
                   Note: Wallet connection and blockchain integration coming in Phase 3 & 5
                 </p>

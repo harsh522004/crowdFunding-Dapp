@@ -441,54 +441,65 @@ CrowdFunding DApp Learning Roadmap
 
 * * * * *
 
-#### Step 3.2: Create Wallet Context
+#### Step 3.2: Use wagmi Hooks Throughout Your App
+
+**Important Note:** With modern wagmi + RainbowKit, you DON'T need to create a custom WalletContext! The `<WagmiProvider>` you added in Step 3.1 already makes wallet state available everywhere.
 
 **Tasks:**
 
-1.  Create `WalletContext.jsx` using React Context
-2.  Use wagmi hooks:
-    -   `useAccount()` - Get connected address & status
-    -   `useNetwork()` - Get current chain
-    -   `useBalance()` - Get ETH balance
-3.  Provide this state to your app
-4.  Display in header:
-    -   Connected address (shortened)
-    -   Network name
-    -   ETH balance
-5.  Add a "wrong network" warning if not on Sepolia
+1.  **Learn wagmi hooks** - These work in ANY component without additional setup:
+    -   `useAccount()` - Get connected address, connection status, chain info
+    -   `useBalance()` - Get ETH balance for any address
+    -   `useChainId()` - Get current chain ID
+    -   Import them directly: `import { useAccount, useBalance } from 'wagmi'`
+
+2.  **Add network detection** to your app:
+    -   Use `useAccount()` to get current chain
+    -   Check if `chain?.id !== sepolia.id` (11155111)
+    -   Show a warning banner: "?? Wrong Network - Please switch to Sepolia"
+
+3.  **Optional: Display more info in header** (beyond what RainbowKit shows):
+    -   ENS name (if available): `useEnsName({ address })`
+    -   Custom balance display
+    -   User's campaign count
 
 **Research Topics:**
 
--   React Context API (you already know this!)
--   wagmi hook composition
+-   wagmi hook composition (using multiple hooks together)
 -   Chain IDs (Sepolia = 11155111)
+-   Why wagmi hooks are globally available (hint: Context under the hood, but you don't manage it!)
 
 **Deliverables:**
 
--   Header shows: `0x1234...5678 | Sepolia | 0.45 ETH`
--   If connected to mainnet, shows warning: "Please switch to Sepolia"
--   Code walkthrough with me: explain how `useAccount` works
-
-* * * * *
-
+-   Network warning banner appears when connected to wrong chain
+-   Demo: Connect to Mainnet ? See warning ? Switch to Sepolia ? Warning disappears
+-   Explain: "Why don't we need to create a custom WalletContext when wagmi already provides one?"
 #### Step 3.3: Add Network Switching
 
 **Tasks:**
 
-1.  Use `useSwitchNetwork()` hook from wagmi
-2.  Add a "Switch to Sepolia" button in the network warning
-3.  Handle the switch request
-4.  Test with MetaMask
+1.  Use `useSwitchChain()` hook from wagmi (modern API, replaces old `useSwitchNetwork`):
+    ```javascript
+    import { useSwitchChain } from 'wagmi';
+    import { sepolia } from 'wagmi/chains';
+    
+    const { switchChain } = useSwitchChain();
+    ```
+2.  Add a "Switch to Sepolia" button in the network warning banner
+3.  On click, call: `switchChain({ chainId: sepolia.id })`
+4.  Test with MetaMask - it should prompt you to switch networks
 
 **Research Topics:**
 
 -   EIP-3326 (wallet_switchEthereumChain)
 -   Programmatic network switching
+-   wagmi v2 API changes (useSwitchChain vs old useSwitchNetwork)
 
 **Deliverables:**
 
--   Button that triggers MetaMask network switch
+-   "Switch to Sepolia" button that triggers MetaMask network switch
 -   Screenshot of MetaMask prompt
+-   Test: Connect to Mainnet → Click switch button → Approve in MetaMask → See banner disappear
 
 * * * * *
 
