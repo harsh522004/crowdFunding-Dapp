@@ -1,3 +1,4 @@
+import {formatEther} from "viem";
 // Enum for campaign states
 export const StateEnum = {
     Funding : 0,
@@ -14,8 +15,8 @@ export const shortenAddress = (address: string): string => {
 };
 // function to format wei to ether
 export const formatWeiToEther = (wei: string): string => {
-  const ether = BigInt(wei) / BigInt(10 ** 18);
-  return ether.toString();
+  const ether = formatEther(BigInt(wei));
+  return ether;
 };
 // function to format timestamp to readable date
 export const formatTimestampToDate = (timestamp: number): string => {
@@ -35,13 +36,26 @@ export const formatDeadlineCountdown = (timestamp: number): string => {
     }
 
 // function to calculate progress percentage
-export const calculateProgressPercentage = (raisedWei: string, goalWei: string): number => {
-  const raised = BigInt(raisedWei);
-  const goal = BigInt(goalWei);
-    if (goal === BigInt(0)) return 0;
-    const percentage = (raised * BigInt(100)) / goal;
-    return Number(percentage);
+export const calculateProgressPercentage = (
+  raisedWei: string,
+  goalWei: string,
+  decimals = 2
+): number => {
+  const raised = BigInt(raisedWei)
+  const goal = BigInt(goalWei)
+
+  if (goal === 0n) return 0
+
+  const scale = 10n ** BigInt(decimals)
+  const percentage =
+    (raised * 100n * scale) / goal
+
+  const value = Number(percentage) / Number(scale)
+  const answer = Math.min(value, 100);
+  console.log("Progress Percentage:", value);
+  return answer;
 }
+
 
 // function to get enum value from string
 export const getStateEnumValue = (state: string): StateEnumType | null => {

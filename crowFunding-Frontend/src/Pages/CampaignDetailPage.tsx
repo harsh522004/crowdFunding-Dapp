@@ -8,30 +8,23 @@ import {
 } from "../utils/formatters";
 import LoadingSpinner from "../components/LoadingSpinner";
 import type { Address } from "viem";
+import type { CampaignDetailsUI } from "../features/campaigns/type";
+import { CONTRACTS } from "../contracts/config";
+import { useAccount } from "wagmi";
+
 
 // Define campaign status type
 type CampaignStatus = "Funding" | "Successful" | "Failed" | "Withdrawn";
 
-// Campaign interface
-interface Campaign {
-  address: Address;
-  creator: Address;
-  goal: string;
-  deadlineTimestamp: number;
-  totalRaisedWei: string;
-  status: CampaignStatus;
-  rewardRate: number;
-  tokenAddress?: string;
-  tokenSymbol?: string;
-}
 
 function CampaignDetailPage() {
   const { address } = useParams<{ address: Address }>();
+
   const location = useLocation();
   const navigate = useNavigate();
 
   // Get campaign from router state, or null if not passed
-  const campaign = (location.state as { campaign?: Campaign })?.campaign;
+  const campaign = (location.state as { campaign?: CampaignDetailsUI })?.campaign;
 
   // If no campaign data, redirect back to home (in Phase 4, we'll fetch from blockchain)
   useEffect(() => {
@@ -46,7 +39,7 @@ function CampaignDetailPage() {
   const [isContributing, setIsContributing] = useState(false);
 
   // Mock connected wallet (will come from wallet context in Phase 3)
-  const MOCK_CONNECTED_WALLET = "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd";
+  const { isConnected, address: connectedAddress } = useAccount(); // change name to avoid conflict
   const MOCK_USER_CONTRIBUTION = "1000000000000000000"; // 1 ETH
 
   // Early return if no campaign
@@ -55,8 +48,8 @@ function CampaignDetailPage() {
   }
 
   // Calculate if user is creator (mock - will use wallet context later)
-  const isCreator =
-    MOCK_CONNECTED_WALLET.toLowerCase() === campaign.creator.toLowerCase();
+  const isCreator = isConnected &&
+    connectedAddress?.toLowerCase() === campaign.creator.toLowerCase();
 
   // Calculate progress using utility function
   const displayProgress = Math.min(
@@ -231,7 +224,7 @@ function CampaignDetailPage() {
                     +
                     {Number(formatWeiToEther(MOCK_USER_CONTRIBUTION)) *
                       campaign.rewardRate}{" "}
-                    {campaign.tokenSymbol || "REWARD"}
+                    {"REWARD"}
                   </p>
                 </div>
               </div>
@@ -291,14 +284,14 @@ function CampaignDetailPage() {
                           You will receive
                         </p>
                         <p className="text-2xl font-bold text-purple-400">
-                          {estimatedReward} {campaign.tokenSymbol || "REWARD"}
+                          {estimatedReward} {"REWARD"}
                         </p>
                       </div>
                       <div className="text-3xl">🎁</div>
                     </div>
                     <p className="text-xs text-slate-500 mt-2">
                       Reward Rate: {campaign.rewardRate}{" "}
-                      {campaign.tokenSymbol || "REWARD"}/ETH
+                      {"REWARD"}/ETH
                     </p>
                   </div>
                 )}
@@ -394,15 +387,15 @@ function CampaignDetailPage() {
                 <div>
                   <p className="text-xs text-slate-500 mb-1">Token Symbol</p>
                   <p className="text-sm font-semibold text-purple-400">
-                    {campaign.tokenSymbol || "REWARD"}
+                    {"REWARD"}
                   </p>
                 </div>
 
                 <div>
                   <p className="text-xs text-slate-500 mb-1">Token Address</p>
                   <p className="text-xs font-mono text-slate-400 break-all">
-                    {campaign.tokenAddress
-                      ? shortenAddress(campaign.tokenAddress)
+                    {CONTRACTS.token
+                      ? shortenAddress(CONTRACTS.token)
                       : "N/A"}
                   </p>
                 </div>
@@ -410,7 +403,7 @@ function CampaignDetailPage() {
                 <div className="pt-3 border-t border-slate-700">
                   <p className="text-xs text-slate-500 mb-1">Reward Rate</p>
                   <p className="text-lg font-bold text-white">
-                    {campaign.rewardRate} {campaign.tokenSymbol || "REWARD"}
+                    {campaign.rewardRate} {"REWARD"}
                   </p>
                   <p className="text-xs text-slate-500">
                     per 1 ETH contributed
