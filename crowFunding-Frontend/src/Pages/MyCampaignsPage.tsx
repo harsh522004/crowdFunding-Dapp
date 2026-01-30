@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import EmptyState from '../components/EmptyState';
-import SkeletonCard from '../components/SkeletonCard';
-import CampaignCard from '../components/CampaignCard';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import EmptyState from "../components/EmptyState";
+import SkeletonCard from "../components/SkeletonCard";
+import CampaignCard from "../components/CampaignCard";
 
 // Mock - will use wallet context and contract data in Phase 4
 const MOCK_USER_CAMPAIGNS: any[] = []; // Empty for now to show empty state

@@ -112,6 +112,7 @@ contract CrowdFundingMaster is Initializable, OwnableUpgradeable {
     function getState() external view returns (State) {
         return compaign.state;
     }
+
     // Campaign status helper functions
     function isSuccessful() external view returns (bool) {
         return compaign.state == State.Successful;
