@@ -36,25 +36,32 @@ export const formatDeadlineCountdown = (timestamp: number): string => {
     }
 
 // function to calculate progress percentage
-export const calculateProgressPercentage = (
-  raisedWei: string,
-  goalWei: string,
-  decimals = 2
-): number => {
-  const raised = BigInt(raisedWei)
-  const goal = BigInt(goalWei)
-
-  if (goal === 0n) return 0
-
-  const scale = 10n ** BigInt(decimals)
-  const percentage =
-    (raised * 100n * scale) / goal
-
-  const value = Number(percentage) / Number(scale)
-  const answer = Math.min(value, 100);
-  console.log("Progress Percentage:", value);
+export function calculateProgressPercentage(raisedWei: string, goalWei: string): number {
+  // Convert string Wei values to BigInt for safe arithmetic with large numbers
+  const raised = BigInt(raisedWei);
+  const goal = BigInt(goalWei);
+  
+  console.log(`Raised: ${raised}, Goal: ${goal}`);
+  // Handle edge cases
+  if (goal === 0n) {
+    return 0;
+  }
+  
+  if (raised <= 0n) {
+    return 0;
+  }
+  
+  // Calculate percentage: (raised / goal) * 100
+  // Multiply by 10000 to preserve 2 decimal places, then divide by 100
+  const percentage = Number((raised * 10000n) / goal) / 100;
+  
+  // Cap at 100% if raised exceeds goal
+  const answer = Math.min(percentage, 100);
+  console.log(`Progress Percentage: ${answer}%`);
   return answer;
 }
+
+
 
 
 // function to get enum value from string

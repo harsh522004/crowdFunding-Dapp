@@ -52,10 +52,8 @@ function CampaignDetailPage() {
     connectedAddress?.toLowerCase() === campaign.creator.toLowerCase();
 
   // Calculate progress using utility function
-  const displayProgress = Math.min(
-    calculateProgressPercentage(campaign.totalRaisedWei, campaign.goal),
-    100,
-  );
+  const displayProgress =
+    calculateProgressPercentage(campaign.totalRaisedWei, campaign.goal);
 
   // Calculate estimated reward
   const estimatedReward = contributionAmount
