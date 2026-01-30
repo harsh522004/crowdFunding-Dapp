@@ -1,13 +1,42 @@
-import { useState } from 'react';
+import {  useState } from 'react';
 import CampaignCard from '../components/CampaignCard';
 import SkeletonCard from '../components/SkeletonCard';
 import EmptyState from '../components/EmptyState';
 import { mockCampaigns } from '../data/mockCampaigns';
 import { useNavigate } from 'react-router-dom';
+// import type { CampaignDTO , Campaign} from '../types/campaign';
+// import { useReadContract } from 'wagmi';
+// import { factoryABI } from '../contracts/ABI/FactoryABI';
+// import { CONTRACTS, SEPOLIA_CHAIN_ID } from '../contracts/config';
+// import useCampaignDetails from '../hooks/useCampaignDetails';
 
 function HomePage() {
   const navigate = useNavigate();
   const [isLoading] = useState(false); // Will be true when fetching from blockchain in Phase 4
+  // const {data , isLoading , error} = useReadContract({
+  //     abi: factoryABI,
+  //     address: CONTRACTS.factory as `0x${string}`,
+  //     functionName: 'getAllCampaigns',
+  //     chainId : SEPOLIA_CHAIN_ID
+  //   })
+
+  //   const campaignAddresses = data as `0x${string}`[] | undefined;
+  //   const [mockCampaigns , setMockCampaigns] = useState<CampaignDTO[]>([]);
+
+  //   // Fetch campaign details for each address
+  //   useEffect( () => {
+  //     if(campaignAddresses && campaignAddresses.length > 0) {
+  //       Promise.all(
+  //         campaignAddresses.map( async (address) => {
+  //           const res = useCampaignDetails(address); // Replace with actual API or method to fetch campaign details
+  //           return res.data;
+  //         })
+  //       ).then( campaignsData => {
+  //         setMockCampaigns(campaignsData);
+  //       });
+  //     }
+  //   }, [campaignAddresses]);
+
 
   const handleViewDetails = (campaignAddress: string) => {
     // Find the campaign data to pass to detail page
