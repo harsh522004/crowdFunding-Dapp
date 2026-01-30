@@ -1,5 +1,6 @@
 import type { CampaignDetailsRaw, CampaignDetailsUI } from "./type";
 
+// Return "UI" friendly campaign details from raw blockchain data
 export const mapCampaignDetails = (
   address: string,
   raw: CampaignDetailsRaw,

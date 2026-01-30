@@ -2,6 +2,7 @@ import { useReadContract } from "wagmi";
 import { factoryABI } from "../../../contracts/ABI/FactoryABI";
 import { CONTRACTS, SEPOLIA_CHAIN_ID } from "../../../contracts/config";
 
+// Custom hook to fetch all campaign addresses from the factory contract
 function useCampaignAddresses(): {
   campaignAddresses: `0x${string}`[];
   isLoading: boolean;

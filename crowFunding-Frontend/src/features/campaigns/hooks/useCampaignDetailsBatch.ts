@@ -4,6 +4,7 @@ import { masterABI } from "../../../contracts/ABI/MasterABI";
 import { SEPOLIA_CHAIN_ID } from "../../../contracts/config";
 import type { CampaignDetailsRaw } from "../type";
 
+// Custom hook to fetch campaign details for a batch of campaign addresses
 export default function useCampaignDetailsBatch(addresses: `0x${string}`[]): {
   dataMap: Record<string, CampaignDetailsRaw>;
   isLoading: boolean;

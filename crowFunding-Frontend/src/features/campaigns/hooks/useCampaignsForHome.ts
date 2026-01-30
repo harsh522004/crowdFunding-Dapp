@@ -3,25 +3,27 @@ import useCampaignDetailsBatch from "./useCampaignDetailsBatch";
 import type { CampaignDetailsUI, CampaignDetailsRaw } from "../type";
 import { mapCampaignDetails } from "../mapper";
 
+// Custom hook to fetch and map campaign details for home page
 function useCampaignsForHome(): {
   campaigns: CampaignDetailsUI[];
   isLoading: boolean;
   error: Error | null;
 } {
-  // call useCampaignAddresses to get all campaign addresses
+  // 1. call useCampaignAddresses to get all campaign addresses
   const {
     campaignAddresses: addresses,
     isLoading: isLoadingAddresses,
     error: addressesError,
   } = useCampaignAddresses();
 
-  // call useCampaignDetailsBatch to get campaign details for all addresses
+  // 2.  call useCampaignDetailsBatch to get campaign details for all addresses
   const {
     dataMap,
     isLoading: isLoadingDetails,
     error: detailsError,
   } = useCampaignDetailsBatch(addresses);
-  // map CampaignDetailsRaw to CampaignDetailsUI
+
+  // 3. map CampaignDetailsRaw to CampaignDetailsUI
   const campaigns: CampaignDetailsUI[] =
     !isLoadingDetails && !isLoadingAddresses
       ? addresses
