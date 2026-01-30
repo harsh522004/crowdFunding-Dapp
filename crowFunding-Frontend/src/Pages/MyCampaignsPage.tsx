@@ -42,13 +42,7 @@ function MyCampaignsPage() {
             {MOCK_USER_CAMPAIGNS.map((campaign) => (
               <CampaignCard
                 key={campaign.address}
-                address={campaign.address}
-                creator={campaign.creator}
-                goal={campaign.goal}
-                deadline={campaign.deadlineTimestamp}
-                totalRaised={campaign.totalRaisedWei}
-                status={campaign.status}
-                rewardRate={campaign.rewardRate}
+                campaign={campaign}
                 onMoreDetails={() => handleViewDetails(campaign.address)}
               />
             ))}

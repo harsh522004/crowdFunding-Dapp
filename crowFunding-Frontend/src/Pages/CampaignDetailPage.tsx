@@ -4,17 +4,18 @@ import {
   formatWeiToEther,
   shortenAddress,
   calculateProgressPercentage,
-  formatTimestampToDate
+  formatTimestampToDate,
 } from "../utils/formatters";
 import LoadingSpinner from "../components/LoadingSpinner";
+import type { Address } from "viem";
 
 // Define campaign status type
-type CampaignStatus = 'Funding' | 'Successful' | 'Failed' | 'Withdrawn';
+type CampaignStatus = "Funding" | "Successful" | "Failed" | "Withdrawn";
 
 // Campaign interface
 interface Campaign {
-  address: string;
-  creator: string;
+  address: Address;
+  creator: Address;
   goal: string;
   deadlineTimestamp: number;
   totalRaisedWei: string;
@@ -25,7 +26,7 @@ interface Campaign {
 }
 
 function CampaignDetailPage() {
-  const { address } = useParams<{ address: string }>();
+  const { address } = useParams<{ address: Address }>();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -35,18 +36,18 @@ function CampaignDetailPage() {
   // If no campaign data, redirect back to home (in Phase 4, we'll fetch from blockchain)
   useEffect(() => {
     if (!campaign) {
-      console.warn('No campaign data found, redirecting to home');
-      navigate('/');
+      console.warn("No campaign data found, redirecting to home");
+      navigate("/");
     }
   }, [campaign, navigate]);
 
-  const [contributionAmount, setContributionAmount] = useState('');
-  const [timeRemaining, setTimeRemaining] = useState('');
+  const [contributionAmount, setContributionAmount] = useState("");
+  const [timeRemaining, setTimeRemaining] = useState("");
   const [isContributing, setIsContributing] = useState(false);
 
   // Mock connected wallet (will come from wallet context in Phase 3)
-  const MOCK_CONNECTED_WALLET = '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd';
-  const MOCK_USER_CONTRIBUTION = '1000000000000000000'; // 1 ETH
+  const MOCK_CONNECTED_WALLET = "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd";
+  const MOCK_USER_CONTRIBUTION = "1000000000000000000"; // 1 ETH
 
   // Early return if no campaign
   if (!campaign) {
@@ -54,18 +55,19 @@ function CampaignDetailPage() {
   }
 
   // Calculate if user is creator (mock - will use wallet context later)
-  const isCreator = MOCK_CONNECTED_WALLET.toLowerCase() === campaign.creator.toLowerCase();
+  const isCreator =
+    MOCK_CONNECTED_WALLET.toLowerCase() === campaign.creator.toLowerCase();
 
   // Calculate progress using utility function
   const displayProgress = Math.min(
     calculateProgressPercentage(campaign.totalRaisedWei, campaign.goal),
-    100
+    100,
   );
 
   // Calculate estimated reward
   const estimatedReward = contributionAmount
     ? (Number(contributionAmount) * campaign.rewardRate).toFixed(2)
-    : '0';
+    : "0";
 
   // Countdown timer
   useEffect(() => {
@@ -74,7 +76,7 @@ function CampaignDetailPage() {
       const timeLeft = campaign.deadlineTimestamp - now;
 
       if (timeLeft <= 0) {
-        setTimeRemaining('Ended');
+        setTimeRemaining("Ended");
         return;
       }
 
@@ -95,33 +97,34 @@ function CampaignDetailPage() {
   // Status badge styling
   const getStatusBadge = () => {
     const badges: Record<CampaignStatus, string> = {
-      'Funding': 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-      'Successful': 'bg-green-500/20 text-green-400 border-green-500/30',
-      'Failed': 'bg-red-500/20 text-red-400 border-red-500/30',
-      'Withdrawn': 'bg-slate-500/20 text-slate-400 border-slate-500/30'
+      Funding: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+      Successful: "bg-green-500/20 text-green-400 border-green-500/30",
+      Failed: "bg-red-500/20 text-red-400 border-red-500/30",
+      Withdrawn: "bg-slate-500/20 text-slate-400 border-slate-500/30",
     };
     return badges[campaign.status];
   };
 
   const getProgressColor = () => {
-    if (campaign.status === 'Successful' || displayProgress >= 100) return 'bg-green-500';
-    if (campaign.status === 'Failed') return 'bg-red-500';
-    return 'bg-blue-500';
+    if (campaign.status === "Successful" || displayProgress >= 100)
+      return "bg-green-500";
+    if (campaign.status === "Failed") return "bg-red-500";
+    return "bg-blue-500";
   };
 
   const handleContribute = async () => {
     if (!contributionAmount || Number(contributionAmount) <= 0) {
-      alert('Please enter a valid contribution amount');
+      alert("Please enter a valid contribution amount");
       return;
     }
 
     setIsContributing(true);
 
     // Simulate transaction
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     alert(`Contributed ${contributionAmount} ETH successfully!`);
-    setContributionAmount('');
+    setContributionAmount("");
     setIsContributing(false);
   };
 
@@ -146,7 +149,9 @@ function CampaignDetailPage() {
                 {address || campaign.address}
               </p>
             </div>
-            <span className={`px-4 py-2 text-sm font-medium rounded-full border ${getStatusBadge()} self-start whitespace-nowrap`}>
+            <span
+              className={`px-4 py-2 text-sm font-medium rounded-full border ${getStatusBadge()} self-start whitespace-nowrap`}
+            >
               {campaign.status}
             </span>
           </div>
@@ -154,13 +159,13 @@ function CampaignDetailPage() {
 
         {/* Main Grid Layout */}
         <div className="grid lg:grid-cols-3 gap-6">
-
           {/* Left Column - Main Info */}
           <div className="lg:col-span-2 space-y-6">
-
             {/* Campaign Stats Card */}
             <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
-              <h2 className="text-xl font-semibold text-white mb-6">Campaign Statistics</h2>
+              <h2 className="text-xl font-semibold text-white mb-6">
+                Campaign Statistics
+              </h2>
 
               {/* Progress Section */}
               <div className="mb-6">
@@ -173,7 +178,9 @@ function CampaignDetailPage() {
                       raised of {formatWeiToEther(campaign.goal)} ETH goal
                     </p>
                   </div>
-                  <span className="text-2xl font-bold text-blue-400">{displayProgress}%</span>
+                  <span className="text-2xl font-bold text-blue-400">
+                    {displayProgress}%
+                  </span>
                 </div>
 
                 {/* Progress Bar */}
@@ -189,7 +196,9 @@ function CampaignDetailPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-slate-900/50 rounded-lg p-4">
                   <p className="text-xs text-slate-500 mb-1">Creator</p>
-                  <p className="text-sm font-mono text-slate-300">{shortenAddress(campaign.creator)}</p>
+                  <p className="text-sm font-mono text-slate-300">
+                    {shortenAddress(campaign.creator)}
+                  </p>
                   {isCreator && (
                     <span className="inline-block mt-2 px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded">
                       You
@@ -212,12 +221,17 @@ function CampaignDetailPage() {
                 </div>
 
                 <div className="bg-slate-900/50 rounded-lg p-4">
-                  <p className="text-xs text-slate-500 mb-1">Your Contribution</p>
+                  <p className="text-xs text-slate-500 mb-1">
+                    Your Contribution
+                  </p>
                   <p className="text-sm font-semibold text-slate-300">
                     {formatWeiToEther(MOCK_USER_CONTRIBUTION)} ETH
                   </p>
                   <p className="text-xs text-purple-400 mt-1">
-                    +{Number(formatWeiToEther(MOCK_USER_CONTRIBUTION)) * campaign.rewardRate} {campaign.tokenSymbol || 'REWARD'}
+                    +
+                    {Number(formatWeiToEther(MOCK_USER_CONTRIBUTION)) *
+                      campaign.rewardRate}{" "}
+                    {campaign.tokenSymbol || "REWARD"}
                   </p>
                 </div>
               </div>
@@ -225,7 +239,9 @@ function CampaignDetailPage() {
 
             {/* Contribution Section */}
             <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
-              <h2 className="text-xl font-semibold text-white mb-4">Contribute to Campaign</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">
+                Contribute to Campaign
+              </h2>
 
               <div className="space-y-4">
                 <div>
@@ -258,7 +274,7 @@ function CampaignDetailPage() {
                       Contributing...
                     </>
                   ) : (
-                    'Contribute Now'
+                    "Contribute Now"
                   )}
                 </button>
 
@@ -271,15 +287,18 @@ function CampaignDetailPage() {
                   <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs text-slate-400">You will receive</p>
+                        <p className="text-xs text-slate-400">
+                          You will receive
+                        </p>
                         <p className="text-2xl font-bold text-purple-400">
-                          {estimatedReward} {campaign.tokenSymbol || 'REWARD'}
+                          {estimatedReward} {campaign.tokenSymbol || "REWARD"}
                         </p>
                       </div>
                       <div className="text-3xl">🎁</div>
                     </div>
                     <p className="text-xs text-slate-500 mt-2">
-                      Reward Rate: {campaign.rewardRate} {campaign.tokenSymbol || 'REWARD'}/ETH
+                      Reward Rate: {campaign.rewardRate}{" "}
+                      {campaign.tokenSymbol || "REWARD"}/ETH
                     </p>
                   </div>
                 )}
@@ -291,35 +310,43 @@ function CampaignDetailPage() {
               <div className="bg-slate-800/50 backdrop-blur-sm border border-purple-700/50 rounded-xl p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-2xl">👑</span>
-                  <h2 className="text-xl font-semibold text-white">Creator Actions</h2>
+                  <h2 className="text-xl font-semibold text-white">
+                    Creator Actions
+                  </h2>
                 </div>
 
                 <div className="space-y-3">
                   <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
-                    <p className="text-xs text-blue-300 mb-1">ℹ️ Campaign Status</p>
+                    <p className="text-xs text-blue-300 mb-1">
+                      ℹ️ Campaign Status
+                    </p>
                     <p className="text-sm text-slate-300">
-                      {campaign.status === 'Funding'
-                        ? 'Campaign is currently active and accepting contributions.'
-                        : 'Campaign has ended. Check available actions below.'}
+                      {campaign.status === "Funding"
+                        ? "Campaign is currently active and accepting contributions."
+                        : "Campaign has ended. Check available actions below."}
                     </p>
                   </div>
 
-                  {campaign.status === 'Funding' && timeRemaining === 'Ended' && (
-                    <button className="w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors">
-                      Finalize Campaign
-                    </button>
-                  )}
+                  {campaign.status === "Funding" &&
+                    timeRemaining === "Ended" && (
+                      <button className="w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors">
+                        Finalize Campaign
+                      </button>
+                    )}
 
-                  {campaign.status === 'Successful' && (
+                  {campaign.status === "Successful" && (
                     <button className="w-full px-4 py-2.5 bg-green-600 hover:bg-green-500 text-white font-medium rounded-lg transition-colors">
-                      Withdraw Funds ({formatWeiToEther(campaign.totalRaisedWei)} ETH)
+                      Withdraw Funds (
+                      {formatWeiToEther(campaign.totalRaisedWei)} ETH)
                     </button>
                   )}
 
-                  {campaign.status === 'Withdrawn' && (
+                  {campaign.status === "Withdrawn" && (
                     <div className="text-center py-4">
                       <span className="text-4xl mb-2 block">✅</span>
-                      <p className="text-sm text-slate-400">Funds have been withdrawn</p>
+                      <p className="text-sm text-slate-400">
+                        Funds have been withdrawn
+                      </p>
                     </div>
                   )}
                 </div>
@@ -327,62 +354,76 @@ function CampaignDetailPage() {
             )}
 
             {/* Refund Section (Conditional - for failed campaigns) */}
-            {campaign.status === 'Failed' && BigInt(MOCK_USER_CONTRIBUTION) > 0n && (
-              <div className="bg-slate-800/50 backdrop-blur-sm border border-red-700/50 rounded-xl p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-2xl">🔄</span>
-                  <h2 className="text-xl font-semibold text-white">Refund Available</h2>
-                </div>
+            {campaign.status === "Failed" &&
+              BigInt(MOCK_USER_CONTRIBUTION) > 0n && (
+                <div className="bg-slate-800/50 backdrop-blur-sm border border-red-700/50 rounded-xl p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-2xl">🔄</span>
+                    <h2 className="text-xl font-semibold text-white">
+                      Refund Available
+                    </h2>
+                  </div>
 
-                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-4">
-                  <p className="text-sm text-red-300 mb-2">
-                    This campaign failed to reach its goal. You can claim a refund.
-                  </p>
-                  <p className="text-lg font-semibold text-white">
-                    Your Contribution: {formatWeiToEther(MOCK_USER_CONTRIBUTION)} ETH
-                  </p>
-                </div>
+                  <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-4">
+                    <p className="text-sm text-red-300 mb-2">
+                      This campaign failed to reach its goal. You can claim a
+                      refund.
+                    </p>
+                    <p className="text-lg font-semibold text-white">
+                      Your Contribution:{" "}
+                      {formatWeiToEther(MOCK_USER_CONTRIBUTION)} ETH
+                    </p>
+                  </div>
 
-                <button className="w-full px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white font-medium rounded-lg transition-colors">
-                  Claim Refund
-                </button>
-              </div>
-            )}
+                  <button className="w-full px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white font-medium rounded-lg transition-colors">
+                    Claim Refund
+                  </button>
+                </div>
+              )}
           </div>
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
-
             {/* Token Info Card */}
             <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Reward Token</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">
+                Reward Token
+              </h3>
 
               <div className="space-y-3">
                 <div>
                   <p className="text-xs text-slate-500 mb-1">Token Symbol</p>
-                  <p className="text-sm font-semibold text-purple-400">{campaign.tokenSymbol || 'REWARD'}</p>
+                  <p className="text-sm font-semibold text-purple-400">
+                    {campaign.tokenSymbol || "REWARD"}
+                  </p>
                 </div>
 
                 <div>
                   <p className="text-xs text-slate-500 mb-1">Token Address</p>
                   <p className="text-xs font-mono text-slate-400 break-all">
-                    {campaign.tokenAddress ? shortenAddress(campaign.tokenAddress) : 'N/A'}
+                    {campaign.tokenAddress
+                      ? shortenAddress(campaign.tokenAddress)
+                      : "N/A"}
                   </p>
                 </div>
 
                 <div className="pt-3 border-t border-slate-700">
                   <p className="text-xs text-slate-500 mb-1">Reward Rate</p>
                   <p className="text-lg font-bold text-white">
-                    {campaign.rewardRate} {campaign.tokenSymbol || 'REWARD'}
+                    {campaign.rewardRate} {campaign.tokenSymbol || "REWARD"}
                   </p>
-                  <p className="text-xs text-slate-500">per 1 ETH contributed</p>
+                  <p className="text-xs text-slate-500">
+                    per 1 ETH contributed
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* Campaign Info Card */}
             <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">About Campaign</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">
+                About Campaign
+              </h3>
 
               <div className="space-y-4 text-sm text-slate-400">
                 <div className="flex items-start gap-2">
@@ -406,7 +447,9 @@ function CampaignDetailPage() {
 
             {/* Activity Card */}
             <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Recent Activity</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">
+                Recent Activity
+              </h3>
 
               <div className="space-y-3">
                 <div className="text-sm">
