@@ -2,11 +2,15 @@ import CampaignCard from "../components/CampaignCard";
 import SkeletonCard from "../components/SkeletonCard";
 import EmptyState from "../components/EmptyState";
 import { useNavigate } from "react-router-dom";
-import useCampaignsForHome from "../features/campaigns/hooks/useCampaignsForHome";
+import {
+  useCampaignsForHome,
+  type UseCampaignsForHomeReturn,
+} from "../features/campaigns/hooks/useCampaignsForHome";
 
 function HomePage() {
   const navigate = useNavigate();
-  const { campaigns, isLoading, error } = useCampaignsForHome();
+  const { campaigns, isLoading }: UseCampaignsForHomeReturn =
+    useCampaignsForHome();
 
   const handleViewDetails = (campaignAddress: string) => {
     // Find the campaign data to pass to detail page

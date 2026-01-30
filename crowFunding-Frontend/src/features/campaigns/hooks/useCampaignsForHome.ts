@@ -1,29 +1,33 @@
-import useCampaignAddresses from "./useCampaignAddresses";
-import useCampaignDetailsBatch from "./useCampaignDetailsBatch";
+import {
+  useCampaignAddresses,
+  type UseCampaignAddressesReturn,
+} from "./useCampaignAddresses";
+import useCampaignDetailsBatch, {
+  type UseCampaignDetailsBatchReturn,
+} from "./useCampaignDetailsBatch";
 import type { CampaignDetailsUI, CampaignDetailsRaw } from "../type";
 import { mapCampaignDetails } from "../mapper";
 
-// Custom hook to fetch and map campaign details for home page
-function useCampaignsForHome(): {
+export type UseCampaignsForHomeReturn = {
   campaigns: CampaignDetailsUI[];
   isLoading: boolean;
   error: Error | null;
-} {
-  // 1. call useCampaignAddresses to get all campaign addresses
+};
+
+// Custom hook to fetch and map campaign details for home page
+export function useCampaignsForHome(): UseCampaignsForHomeReturn {
   const {
     campaignAddresses: addresses,
     isLoading: isLoadingAddresses,
     error: addressesError,
-  } = useCampaignAddresses();
+  }: UseCampaignAddressesReturn = useCampaignAddresses();
 
-  // 2.  call useCampaignDetailsBatch to get campaign details for all addresses
   const {
     dataMap,
     isLoading: isLoadingDetails,
     error: detailsError,
-  } = useCampaignDetailsBatch(addresses);
+  }: UseCampaignDetailsBatchReturn = useCampaignDetailsBatch(addresses);
 
-  // 3. map CampaignDetailsRaw to CampaignDetailsUI
   const campaigns: CampaignDetailsUI[] =
     !isLoadingDetails && !isLoadingAddresses
       ? addresses
@@ -34,6 +38,7 @@ function useCampaignsForHome(): {
             }
             return null;
           })
+          // Filter out any null values in case of missing data
           .filter(
             (
               campaign: CampaignDetailsUI | null,
@@ -50,5 +55,3 @@ function useCampaignsForHome(): {
     error,
   };
 }
-
-export default useCampaignsForHome;
