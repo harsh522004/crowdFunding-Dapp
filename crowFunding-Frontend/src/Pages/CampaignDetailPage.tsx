@@ -11,6 +11,7 @@ import type { Address } from "viem";
 import type { CampaignDetailsUI } from "../features/campaigns/type";
 import { CONTRACTS } from "../contracts/config";
 import { useAccount } from "wagmi";
+import { useUserContribution } from "../features/campaigns/hooks/useUserContribution";
 
 
 // Define campaign status type
@@ -42,6 +43,7 @@ function CampaignDetailPage() {
   const { isConnected, address: connectedAddress } = useAccount(); // change name to avoid conflict
   const MOCK_USER_CONTRIBUTION = "1000000000000000000"; // 1 ETH
 
+
   // Early return if no campaign
   if (!campaign) {
     return null;
@@ -60,6 +62,8 @@ function CampaignDetailPage() {
     ? (Number(contributionAmount) * campaign.rewardRate).toFixed(2)
     : "0";
 
+  // Get user's contribution for current campaign 
+  const userContributionInWei: { userContribution: string | null, isLoading: boolean, error: unknown } = useUserContribution(campaign.address as Address);// will replace with hook in Phase 3
   // Countdown timer
   useEffect(() => {
     const updateCountdown = () => {
@@ -207,7 +211,7 @@ function CampaignDetailPage() {
 
                 <div className="bg-slate-900/50 rounded-lg p-4">
                   <p className="text-xs text-slate-500 mb-1">Contributors</p>
-                  <p className="text-sm font-semibold text-slate-300">24</p>
+                  <p className="text-sm font-semibold text-slate-300">21</p>
                   <p className="text-xs text-slate-500 mt-1">Mock data</p>
                 </div>
 
@@ -216,11 +220,11 @@ function CampaignDetailPage() {
                     Your Contribution
                   </p>
                   <p className="text-sm font-semibold text-slate-300">
-                    {formatWeiToEther(MOCK_USER_CONTRIBUTION)} ETH
+                    {formatWeiToEther(userContributionInWei.userContribution || "0")} ETH
                   </p>
                   <p className="text-xs text-purple-400 mt-1">
                     +
-                    {Number(formatWeiToEther(MOCK_USER_CONTRIBUTION)) *
+                    {Number(formatWeiToEther(userContributionInWei.userContribution || "0")) *
                       campaign.rewardRate}{" "}
                     {"REWARD"}
                   </p>
