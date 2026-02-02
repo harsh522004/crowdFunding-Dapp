@@ -40,8 +40,6 @@ export function calculateProgressPercentage(raisedWei: string, goalWei: string):
   // Convert string Wei values to BigInt for safe arithmetic with large numbers
   const raised = BigInt(raisedWei);
   const goal = BigInt(goalWei);
-  
-  console.log(`Raised: ${raised}, Goal: ${goal}`);
   // Handle edge cases
   if (goal === 0n) {
     return 0;
@@ -56,9 +54,7 @@ export function calculateProgressPercentage(raisedWei: string, goalWei: string):
   const percentage = Number((raised * 10000n) / goal) / 100;
   
   // Cap at 100% if raised exceeds goal
-  const answer = Math.min(percentage, 100);
-  console.log(`Progress Percentage: ${answer}%`);
-  return answer;
+  return Math.min(percentage, 100);
 }
 
 

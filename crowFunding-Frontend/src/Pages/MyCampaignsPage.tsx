@@ -3,18 +3,26 @@ import { useNavigate } from "react-router-dom";
 import EmptyState from "../components/EmptyState";
 import SkeletonCard from "../components/SkeletonCard";
 import CampaignCard from "../components/CampaignCard";
+import { useMyCampaigns, type useMyCampaignsReturn } from "../features/campaigns/hooks/useMyCampaigns";
+import { useAccount } from "wagmi";
+import type { Address } from "viem/accounts";
 
-// Mock - will use wallet context and contract data in Phase 4
-const MOCK_USER_CAMPAIGNS: any[] = []; // Empty for now to show empty state
 
 function MyCampaignsPage() {
   const navigate = useNavigate();
-  const [isLoading] = useState(false); // Will be true when fetching from blockchain
 
-  const handleViewDetails = (campaignAddress: string) => {
-    navigate(`/campaign/${campaignAddress}`);
+  // current connected user's address
+  const { address: userAddress } = useAccount();
+  // use useMyCampaigns hook with current user's address from rainbowkit useAccount hook
+  const { campaigns: USER_CAMPAIGNS, isLoading: isLoadingCampaigns }: useMyCampaignsReturn = useMyCampaigns(userAddress as Address);
+  const handleViewDetails = (campaignAddress: Address) => {
+
+    const campaign = USER_CAMPAIGNS.find((c) => c.address === campaignAddress);
+
+    navigate(`/campaign/${campaignAddress}`, {
+      state: { campaign }, // Pass campaign data via router state
+    });
   };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <div className="container mx-auto px-4 py-6 sm:py-8 lg:py-12">
@@ -29,21 +37,21 @@ function MyCampaignsPage() {
         </div>
 
         {/* Content */}
-        {isLoading ? (
+        {isLoadingCampaigns ? (
           // Loading State
           <ul className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3].map((i) => (
               <SkeletonCard key={i} />
             ))}
           </ul>
-        ) : MOCK_USER_CAMPAIGNS.length > 0 ? (
+        ) : USER_CAMPAIGNS.length > 0 ? (
           // User's Campaigns
           <ul className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 animate-fadeIn">
-            {MOCK_USER_CAMPAIGNS.map((campaign) => (
+            {USER_CAMPAIGNS.map((campaign) => (
               <CampaignCard
                 key={campaign.address}
                 campaign={campaign}
-                onMoreDetails={() => handleViewDetails(campaign.address)}
+                onMoreDetails={() => handleViewDetails(campaign.address as Address)}
               />
             ))}
           </ul>
