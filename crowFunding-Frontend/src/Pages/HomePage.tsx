@@ -5,11 +5,11 @@ import { useNavigate } from "react-router-dom";
 import {
   useCampaignsForHome,
   type UseCampaignsForHomeReturn,
-} from "../features/campaigns/hooks/useCampaignsForHome";
+} from "../features/campaigns/hooks";
 
 function HomePage() {
   const navigate = useNavigate();
-  const { campaigns, isLoading }: UseCampaignsForHomeReturn =
+  const { campaigns, isLoading, error }: UseCampaignsForHomeReturn =
     useCampaignsForHome();
 
   const handleViewDetails = (campaignAddress: string) => {
@@ -20,6 +20,18 @@ function HomePage() {
       state: { campaign }, // Pass campaign data via router state
     });
   };
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6">
+          <p className="text-red-400">Failed to load campaigns</p>
+          <p className="text-sm text-slate-400 mt-2">{error.message}</p>
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">

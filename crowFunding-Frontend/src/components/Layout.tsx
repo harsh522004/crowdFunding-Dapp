@@ -1,11 +1,14 @@
 import { Outlet } from "react-router-dom";
 import Header from "./Header";
+import { NetworkGuard } from "./NetworkGuard";
 
 function Layout() {
   return (
     <div>
       <Header></Header>
-      <Outlet />
+      <NetworkGuard>
+        <Outlet />
+      </NetworkGuard>
     </div>
   );
 }

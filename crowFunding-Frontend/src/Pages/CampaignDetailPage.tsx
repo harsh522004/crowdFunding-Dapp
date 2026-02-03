@@ -11,7 +11,7 @@ import type { Address } from "viem";
 import type { CampaignDetailsUI } from "../features/campaigns/type";
 import { CONTRACTS } from "../contracts/config";
 import { useAccount } from "wagmi";
-import { useUserContribution } from "../features/campaigns/hooks/useUserContribution";
+import { useUserContribution, type UseUserContributionReturn } from "../features/campaigns/hooks";
 
 
 // Define campaign status type
@@ -41,8 +41,6 @@ function CampaignDetailPage() {
 
   // Mock connected wallet (will come from wallet context in Phase 3)
   const { isConnected, address: connectedAddress } = useAccount(); // change name to avoid conflict
-  const MOCK_USER_CONTRIBUTION = "1000000000000000000"; // 1 ETH
-
 
   // Early return if no campaign
   if (!campaign) {
@@ -63,7 +61,7 @@ function CampaignDetailPage() {
     : "0";
 
   // Get user's contribution for current campaign 
-  const userContributionInWei: { userContribution: string | null, isLoading: boolean, error: unknown } = useUserContribution(campaign.address as Address);// will replace with hook in Phase 3
+  const userContributionData: UseUserContributionReturn = useUserContribution(campaign.address);// will replace with hook in Phase 3
   // Countdown timer
   useEffect(() => {
     const updateCountdown = () => {
@@ -167,10 +165,10 @@ function CampaignDetailPage() {
                 <div className="flex justify-between items-baseline mb-3">
                   <div>
                     <p className="text-4xl font-bold text-white">
-                      {formatWeiToEther(campaign.totalRaisedWei)} ETH
+                      {formatWeiToEther(campaign.totalRaisedWei, 2)} ETH
                     </p>
                     <p className="text-sm text-slate-400 mt-1">
-                      raised of {formatWeiToEther(campaign.goal)} ETH goal
+                      raised of {formatWeiToEther(campaign.goal, 2)} ETH goal
                     </p>
                   </div>
                   <span className="text-2xl font-bold text-blue-400">
@@ -208,7 +206,7 @@ function CampaignDetailPage() {
                   </p>
                   <p className="text-xs text-blue-400 mt-1">{timeRemaining}</p>
                 </div>
-
+                {/* TODO : needs to update */}
                 <div className="bg-slate-900/50 rounded-lg p-4">
                   <p className="text-xs text-slate-500 mb-1">Contributors</p>
                   <p className="text-sm font-semibold text-slate-300">21</p>
@@ -220,11 +218,11 @@ function CampaignDetailPage() {
                     Your Contribution
                   </p>
                   <p className="text-sm font-semibold text-slate-300">
-                    {formatWeiToEther(userContributionInWei.userContribution || "0")} ETH
+                    {formatWeiToEther(userContributionData.userContribution || "0", 2)} ETH
                   </p>
                   <p className="text-xs text-purple-400 mt-1">
                     +
-                    {Number(formatWeiToEther(userContributionInWei.userContribution || "0")) *
+                    {Number(formatWeiToEther(userContributionData.userContribution || "0", 2)) *
                       campaign.rewardRate}{" "}
                     {"REWARD"}
                   </p>
@@ -332,7 +330,7 @@ function CampaignDetailPage() {
                   {campaign.status === "Successful" && (
                     <button className="w-full px-4 py-2.5 bg-green-600 hover:bg-green-500 text-white font-medium rounded-lg transition-colors">
                       Withdraw Funds (
-                      {formatWeiToEther(campaign.totalRaisedWei)} ETH)
+                      {formatWeiToEther(campaign.totalRaisedWei, 2)} ETH)
                     </button>
                   )}
 
@@ -350,7 +348,7 @@ function CampaignDetailPage() {
 
             {/* Refund Section (Conditional - for failed campaigns) */}
             {campaign.status === "Failed" &&
-              BigInt(MOCK_USER_CONTRIBUTION) > 0n && (
+              BigInt(userContributionData.userContribution || "0") > 0n && (
                 <div className="bg-slate-800/50 backdrop-blur-sm border border-red-700/50 rounded-xl p-6">
                   <div className="flex items-center gap-2 mb-4">
                     <span className="text-2xl">🔄</span>
@@ -366,7 +364,7 @@ function CampaignDetailPage() {
                     </p>
                     <p className="text-lg font-semibold text-white">
                       Your Contribution:{" "}
-                      {formatWeiToEther(MOCK_USER_CONTRIBUTION)} ETH
+                      {formatWeiToEther(userContributionData.userContribution || "0", 4)} ETH
                     </p>
                   </div>
 

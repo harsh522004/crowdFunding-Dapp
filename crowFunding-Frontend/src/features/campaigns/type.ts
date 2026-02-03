@@ -12,8 +12,8 @@ export type CampaignDetailsRaw = {
 
 // UI type for campaign details redner on Frontend
 export type CampaignDetailsUI = {
-  address: string;
-  creator: string;
+  address: Address;
+  creator: Address;
   goal: string;
   deadlineTimestamp: number;
   totalRaisedWei: string;

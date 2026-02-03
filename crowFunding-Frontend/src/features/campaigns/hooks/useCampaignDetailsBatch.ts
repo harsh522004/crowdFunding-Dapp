@@ -11,7 +11,7 @@ export type UseCampaignDetailsBatchReturn = {
 };
 
 // Custom hook to fetch campaign details for a batch of campaign addresses
-export default function useCampaignDetailsBatch(
+export function useCampaignDetailsBatch(
   addresses: `0x${string}`[],
 ): UseCampaignDetailsBatchReturn {
   const campaignDetailsQueries: UseReadContractsReturnType = useReadContracts({

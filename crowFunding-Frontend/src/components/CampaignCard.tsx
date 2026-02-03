@@ -63,10 +63,10 @@ function CampaignCard(props: CampaignCardProps) {
           <div className="flex justify-between items-baseline mb-2">
             <div>
               <p className="text-2xl font-bold text-white">
-                {formatWeiToEther(props.campaign.totalRaisedWei)} ETH
+                {formatWeiToEther(props.campaign.totalRaisedWei, 2)} ETH
               </p>
               <p className="text-xs text-slate-400">
-                raised of {formatWeiToEther(props.campaign.goal)} ETH goal
+                raised of {formatWeiToEther(props.campaign.goal, 2)} ETH goal
               </p>
             </div>
             <span className="text-sm font-semibold text-blue-400">

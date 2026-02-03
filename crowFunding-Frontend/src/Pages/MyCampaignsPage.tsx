@@ -1,9 +1,8 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import EmptyState from "../components/EmptyState";
 import SkeletonCard from "../components/SkeletonCard";
 import CampaignCard from "../components/CampaignCard";
-import { useMyCampaigns, type useMyCampaignsReturn } from "../features/campaigns/hooks/useMyCampaigns";
+import { useMyCampaigns, type useMyCampaignsReturn } from "../features/campaigns/hooks";
 import { useAccount } from "wagmi";
 import type { Address } from "viem/accounts";
 
@@ -14,7 +13,7 @@ function MyCampaignsPage() {
   // current connected user's address
   const { address: userAddress } = useAccount();
   // use useMyCampaigns hook with current user's address from rainbowkit useAccount hook
-  const { campaigns: USER_CAMPAIGNS, isLoading: isLoadingCampaigns }: useMyCampaignsReturn = useMyCampaigns(userAddress as Address);
+  const { campaigns: USER_CAMPAIGNS, isLoading: isLoadingCampaigns, error }: useMyCampaignsReturn = useMyCampaigns(userAddress as Address);
   const handleViewDetails = (campaignAddress: Address) => {
 
     const campaign = USER_CAMPAIGNS.find((c) => c.address === campaignAddress);
@@ -23,6 +22,19 @@ function MyCampaignsPage() {
       state: { campaign }, // Pass campaign data via router state
     });
   };
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6">
+          <p className="text-red-400">Failed to load campaigns</p>
+          <p className="text-sm text-slate-400 mt-2">{error.message}</p>
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <div className="container mx-auto px-4 py-6 sm:py-8 lg:py-12">
@@ -40,7 +52,7 @@ function MyCampaignsPage() {
         {isLoadingCampaigns ? (
           // Loading State
           <ul className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3, 4, 5, 6].map((i) => (
               <SkeletonCard key={i} />
             ))}
           </ul>
@@ -51,7 +63,7 @@ function MyCampaignsPage() {
               <CampaignCard
                 key={campaign.address}
                 campaign={campaign}
-                onMoreDetails={() => handleViewDetails(campaign.address as Address)}
+                onMoreDetails={() => handleViewDetails(campaign.address)}
               />
             ))}
           </ul>

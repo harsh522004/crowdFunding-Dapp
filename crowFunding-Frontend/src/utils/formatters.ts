@@ -14,9 +14,13 @@ export const shortenAddress = (address: string): string => {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 };
 // function to format wei to ether
-export const formatWeiToEther = (wei: string): string => {
+export const formatWeiToEther = (wei: string , decimals = 4): string => {
   const ether = formatEther(BigInt(wei));
-  return ether;
+  const asNumber = parseFloat(ether);
+  if (asNumber > 0 && asNumber < 0.0001) {
+    return ether; // Show full precision for tiny amounts
+  }
+  return asNumber.toFixed(decimals);
 };
 // function to format timestamp to readable date
 export const formatTimestampToDate = (timestamp: number): string => {
