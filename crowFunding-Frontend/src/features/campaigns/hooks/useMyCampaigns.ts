@@ -1,7 +1,8 @@
 
-import useCampaignDetailsBatch, {
+import  {
+  useCampaignDetailsBatch,
   type UseCampaignDetailsBatchReturn,
-} from "./useCampaignDetailsBatch";
+} from "./index";
 import type { CampaignDetailsUI, CampaignDetailsRaw } from "../type";
 import { mapCampaignDetails } from "../mapper";
 import type { Address } from "viem/accounts";

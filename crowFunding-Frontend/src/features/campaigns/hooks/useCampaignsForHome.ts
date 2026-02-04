@@ -1,10 +1,9 @@
 import {
+  useCampaignDetailsBatch, 
+  type UseCampaignDetailsBatchReturn,
   useCampaignAddresses,
   type UseCampaignAddressesReturn,
-} from "./useCampaignAddresses";
-import useCampaignDetailsBatch, {
-  type UseCampaignDetailsBatchReturn,
-} from "./useCampaignDetailsBatch";
+} from "./index";
 import type { CampaignDetailsUI, CampaignDetailsRaw } from "../type";
 import { mapCampaignDetails } from "../mapper";
 
