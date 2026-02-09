@@ -1,16 +1,19 @@
-import { useState } from 'react';
-import LoadingSpinner from '../components/LoadingSpinner';
+import { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
+import { useNavigate } from 'react-router-dom';
+import { useCreateCampaign } from '../features/campaigns/hooks';
+import TransactionButton from '../components/TransactionButton';
 
 // Form which allows users to create a new campaign with goal in ETH, Duration in days and Reward Rate PER ETH with Require validation
 function CreateCampaignPage() {
   const { isConnected } = useAccount();
+  const navigate = useNavigate();
+  const { createCampaign, newCampaignAddress, txState, txHash, isSuccess, error } = useCreateCampaign();
 
   // Form state
   const [goal, setGoal] = useState('');
   const [duration, setDuration] = useState('');
   const [tokensPerEth, setTokensPerEth] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Error state
   const [errors, setErrors] = useState({
@@ -67,23 +70,27 @@ function CreateCampaignPage() {
   };
 
   // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (validateForm()) {
-      setIsSubmitting(true);
-
-      // Simulate transaction delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // TODO: In Phase 5, we'll call the smart contract here
-      console.log('Form is valid! Creating campaign...');
-      console.log({ goal, duration, tokensPerEth });
-      alert(`Campaign Details:\nGoal: ${goal} ETH\nDuration: ${duration} days\nReward: ${tokensPerEth} tokens/ETH`);
-
-      setIsSubmitting(false);
+      createCampaign({
+        goalInEth: goal,
+        durationInDays: duration,
+        tokensPerEth: tokensPerEth,
+      });
     }
   };
+
+
+  useEffect(() => {
+    if (isSuccess && newCampaignAddress) {
+      setTimeout(() => {
+        navigate(`/campaign/${newCampaignAddress}`);
+      }, 2000);
+    }
+  }, [isSuccess, newCampaignAddress, navigate]);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
@@ -221,26 +228,33 @@ function CreateCampaignPage() {
                       ⚠️ Please connect your wallet to create a campaign.
                     </p>
                   ) : (
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full px-6 py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.02] active:scale-[0.98] disabled:scale-100 disabled:shadow-none flex items-center justify-center gap-2"
-                    >
-                      {
-                        isSubmitting ? (
-                          <>
-                            <LoadingSpinner size="sm" color="white" />
-                            Creating Campaign...
-                          </>
-                        ) : (
-                          'Create Campaign'
-                        )
 
-                      }
+                    <TransactionButton
+                      onClick={() => handleSubmit({} as React.FormEvent)}
+                      label='Create Campaign'
+                      txState={txState}
+                      txHash={txHash}
+                      error={error}
+                      disabled={goal === '' || duration === '' || tokensPerEth === '' || Object.values(errors).some((err) => err !== '')}
+                      fullWidth
+                    />
 
-                    </button>
                   )
                 }
+                {error && (
+                  <div className="mt-4 p-4 bg-red-100 text-red-700 rounded">
+                    Error: {error}
+                  </div>
+                )}
+                {isSuccess && newCampaignAddress && (
+                  <div className="mt-4 p-4 bg-green-100 text-green-700 rounded">
+                    ✅ Campaign created! Redirecting to campaign page...
+                    <div className="text-sm mt-2">
+                      Address: {newCampaignAddress}
+                    </div>
+                  </div>
+                )}
+
 
                 <p className="mt-3 text-xs text-center text-slate-500">
                   Note: Wallet connection and blockchain integration coming in Phase 3 & 5

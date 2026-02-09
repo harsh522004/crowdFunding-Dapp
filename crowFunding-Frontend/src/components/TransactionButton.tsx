@@ -1,22 +1,22 @@
 import LoadingSpinner from './LoadingSpinner';
 
+// Transaction state from useTransactionFlow
+export type TransactionState = 'idle' | 'preparing' | 'pending' | 'success' | 'error';
+
 interface TransactionButtonProps {
     // REQUIRED PROPS
-    onClick: () => void;           // What happens when user clicks
+    onClick: () => void | Promise<void>;  // What happens when user clicks
+    label: string;                         // Button text in idle state
 
-    // STATE PROPS (from useTransactionFlow)
-    isLoading?: boolean;           // True when wallet is confirming
-    isPending?: boolean;           // True when transaction is pending
-    isSuccess?: boolean;           // True when transaction succeeded
-    isError?: boolean;             // True when transaction failed
-    error?: string | null;         // Error message to display
+    // STATE PROPS (unified - from useTransactionFlow)
+    txState?: TransactionState;            // Current transaction state
+    txHash?: string | null;                // Transaction hash for Etherscan link
+    error?: string | null;                 // Error message to display
 
-    // TEXT PROPS (customize for each use case)
-    idleText: string;
-    loadingText?: string;
+    // OPTIONAL TEXT OVERRIDES
+    preparingText?: string;
     pendingText?: string;
     successText?: string;
-    errorText?: string;
 
     // STYLING PROPS
     variant?: 'primary' | 'success' | 'danger' | 'secondary';
@@ -27,16 +27,13 @@ interface TransactionButtonProps {
 
 export default function TransactionButton({
     onClick,
-    isLoading = false,
-    isPending = false,
-    isSuccess = false,
-    isError = false,
+    label,
+    txState = 'idle',
+    txHash,
     error = null,
-    idleText,
-    loadingText = "Confirming in wallet...",
+    preparingText = "Confirming in wallet...",
     pendingText = "Transaction pending...",
     successText = "Success!",
-    errorText,
     variant = 'primary',
     disabled = false,
     className = '',
@@ -45,27 +42,34 @@ export default function TransactionButton({
 
     // DETERMINE CURRENT TEXT based on state
     const getCurrentText = (): string => {
-        if (isSuccess) return successText;
-        if (isError) return errorText || error || "Transaction Failed";
-        if (isLoading) return loadingText;
-        if (isPending) return pendingText;
-        return idleText;
+        switch (txState) {
+            case 'preparing':
+                return preparingText;
+            case 'pending':
+                return pendingText;
+            case 'success':
+                return successText;
+            case 'error':
+                return error || "Transaction Failed";
+            default:
+                return label;
+        }
     };
 
-    // Button should be disabled during loading, pending, success, or custom disabled
-    const isDisabled = isLoading || isPending || isSuccess || disabled;
+    // Button should be disabled during any active state or custom disabled
+    const isDisabled = txState !== 'idle' || disabled;
 
     // GET VARIANT STYLES - different colors for different states
     const getVariantStyles = (): string => {
-        if (isSuccess) {
+        if (txState === 'success') {
             return 'bg-green-600 hover:bg-green-600 border-green-500';
         }
 
-        if (isError) {
+        if (txState === 'error') {
             return 'bg-red-600 hover:bg-red-500 border-red-500';
         }
 
-        if (isLoading || isPending) {
+        if (txState === 'preparing' || txState === 'pending') {
             return 'bg-slate-600 border-slate-600 cursor-wait';
         }
 
@@ -81,9 +85,9 @@ export default function TransactionButton({
 
     // GET ICON - show different icons based on state
     const getIcon = () => {
-        if (isSuccess) return <span className="text-xl">✅</span>;
-        if (isError) return <span className="text-xl">❌</span>;
-        if (isLoading || isPending) return <LoadingSpinner size="sm" color="white" />;
+        if (txState === 'success') return <span className="text-xl">✅</span>;
+        if (txState === 'error') return <span className="text-xl">❌</span>;
+        if (txState === 'preparing' || txState === 'pending') return <LoadingSpinner size="sm" color="white" />;
         return null;
     };
 

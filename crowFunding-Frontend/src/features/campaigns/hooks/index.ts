@@ -4,3 +4,4 @@ export {useCampaignAddresses , type UseCampaignAddressesReturn} from "./useCampa
 export {useCampaignDetailsBatch, type UseCampaignDetailsBatchReturn} from "./useCampaignDetailsBatch";
 export { useUserContribution, type UseUserContributionReturn } from "./useUserContribution";
 export { useTransactionFlow } from './useTransactionFlow';
+export {useCreateCampaign , type CreateCmpaignInput} from "./useCreateCampaign";
