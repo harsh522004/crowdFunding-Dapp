@@ -11,7 +11,8 @@ import type { Address } from "viem";
 import type { CampaignDetailsUI } from "../features/campaigns/type";
 import { CONTRACTS } from "../contracts/config";
 import { useAccount } from "wagmi";
-import { useUserContribution, type UseUserContributionReturn } from "../features/campaigns/hooks";
+import { useUserContribution, type UseUserContributionReturn, useCampaignContribution, type ContributionInput } from "../features/campaigns/hooks";
+import TransactionButton from "../components/TransactionButton";
 
 
 // Define campaign status type
@@ -23,6 +24,9 @@ function CampaignDetailPage() {
 
   const location = useLocation();
   const navigate = useNavigate();
+
+  const { contributeToCampaign, txState: contributionTxState, isPending: isContributionPending, isConfirming: isContributionConfirming, isSuccess: isContributionSuccess, writeError: contributionError } = useCampaignContribution();
+
 
   // Get campaign from router state, or null if not passed
   const campaign = (location.state as { campaign?: CampaignDetailsUI })?.campaign;
@@ -61,7 +65,8 @@ function CampaignDetailPage() {
     : "0";
 
   // Get user's contribution for current campaign 
-  const userContributionData: UseUserContributionReturn = useUserContribution(campaign.address);// will replace with hook in Phase 3
+  const userContributionData: UseUserContributionReturn = useUserContribution(campaign.address);
+
   // Countdown timer
   useEffect(() => {
     const updateCountdown = () => {
@@ -105,21 +110,20 @@ function CampaignDetailPage() {
     return "bg-blue-500";
   };
 
-  const handleContribute = async () => {
-    if (!contributionAmount || Number(contributionAmount) <= 0) {
-      alert("Please enter a valid contribution amount");
-      return;
-    }
+  const
+    handleContribute = async () => {
+      if (!contributionAmount || Number(contributionAmount) <= 0) {
+        alert("Please enter a valid contribution amount");
+        return;
+      }
 
-    setIsContributing(true);
+      setIsContributing(true);
 
-    // Simulate transaction
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+      contributeToCampaign({ campaignAddress: campaign.address, amountInEth: contributionAmount });
 
-    alert(`Contributed ${contributionAmount} ETH successfully!`);
-    setContributionAmount("");
-    setIsContributing(false);
-  };
+      setContributionAmount("");
+      setIsContributing(false);
+    };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
@@ -247,7 +251,6 @@ function CampaignDetailPage() {
                       value={contributionAmount}
                       onChange={(e) => setContributionAmount(e.target.value)}
                       placeholder="0.0"
-                      step="0.01"
                       className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">
@@ -256,7 +259,7 @@ function CampaignDetailPage() {
                   </div>
                 </div>
 
-                <button
+                {/* <button
                   onClick={handleContribute}
                   disabled={isContributing || !contributionAmount}
                   className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.02] active:scale-[0.98] disabled:scale-100 disabled:shadow-none flex items-center justify-center gap-2"
@@ -269,7 +272,15 @@ function CampaignDetailPage() {
                   ) : (
                     "Contribute Now"
                   )}
-                </button>
+                </button> */}
+                <TransactionButton
+                  onClick={handleContribute}
+                  label="Contribute Now"
+                  txState={contributionTxState}
+                  error={contributionError}
+                  disabled={isContributing || !contributionAmount}
+                />
+
 
                 <p className="text-xs text-center text-slate-500">
                   Note: Wallet connection coming in Phase 3

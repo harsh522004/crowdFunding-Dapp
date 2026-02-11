@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCreateCampaign } from '../features/campaigns/hooks';
 import TransactionButton from '../components/TransactionButton';
 
-// Form which allows users to create a new campaign with goal in ETH, Duration in days and Reward Rate PER ETH with Require validation
+
 function CreateCampaignPage() {
   const { isConnected } = useAccount();
   const navigate = useNavigate();
