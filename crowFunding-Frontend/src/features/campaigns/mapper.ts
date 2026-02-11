@@ -12,7 +12,7 @@ export const mapCampaignDetails = (
     3: "Withdrawn",
   };
   return {
-    address,
+    address: address as CampaignDetailsUI["address"],
     creator: raw.creator,
     goal: raw.goal.toString(),
     deadlineTimestamp: Number(raw.deadline),

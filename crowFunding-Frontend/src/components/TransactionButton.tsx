@@ -1,6 +1,6 @@
 import LoadingSpinner from './LoadingSpinner';
 
-// Transaction state from useTransactionFlow
+
 export type TransactionState = 'idle' | 'preparing' | 'pending' | 'success' | 'error';
 
 interface TransactionButtonProps {
@@ -8,7 +8,7 @@ interface TransactionButtonProps {
     onClick: () => void | Promise<void>;  // What happens when user clicks
     label: string;                         // Button text in idle state
 
-    // STATE PROPS (unified - from useTransactionFlow)
+    // STATE PROPS 
     txState?: TransactionState;            // Current transaction state
     txHash?: string | null;                // Transaction hash for Etherscan link
     error?: string | null;                 // Error message to display
@@ -29,7 +29,6 @@ export default function TransactionButton({
     onClick,
     label,
     txState = 'idle',
-    txHash,
     error = null,
     preparingText = "Confirming in wallet...",
     pendingText = "Transaction pending...",
@@ -40,7 +39,7 @@ export default function TransactionButton({
     fullWidth = false,
 }: TransactionButtonProps) {
 
-    // DETERMINE CURRENT TEXT based on state
+
     const getCurrentText = (): string => {
         switch (txState) {
             case 'preparing':
@@ -56,10 +55,10 @@ export default function TransactionButton({
         }
     };
 
-    // Button should be disabled during any active state or custom disabled
+
     const isDisabled = txState !== 'idle' || disabled;
 
-    // GET VARIANT STYLES - different colors for different states
+
     const getVariantStyles = (): string => {
         if (txState === 'success') {
             return 'bg-green-600 hover:bg-green-600 border-green-500';
@@ -83,7 +82,7 @@ export default function TransactionButton({
         return variants[variant];
     };
 
-    // GET ICON - show different icons based on state
+
     const getIcon = () => {
         if (txState === 'success') return <span className="text-xl">✅</span>;
         if (txState === 'error') return <span className="text-xl">❌</span>;
