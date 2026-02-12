@@ -1,4 +1,4 @@
-import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
   formatWeiToEther,
@@ -6,13 +6,21 @@ import {
   calculateProgressPercentage,
   formatTimestampToDate,
 } from "../utils/formatters";
-import LoadingSpinner from "../components/LoadingSpinner";
+
 import type { Address } from "viem";
-import type { CampaignDetailsUI } from "../features/campaigns/type";
 import { CONTRACTS } from "../contracts/config";
 import { useAccount } from "wagmi";
-import { useUserContribution, type UseUserContributionReturn, useCampaignContribution, type ContributionInput } from "../features/campaigns/hooks";
+import {
+  useUserContribution,
+  type UseUserContributionReturn,
+  useCampaignContribution,
+  useCampaignDetails,
+  useFinalizeCampaign,
+  useWithdrawCampaign,
+  useRefundCampaign
+} from "../features/campaigns/hooks";
 import TransactionButton from "../components/TransactionButton";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 
 // Define campaign status type
@@ -22,53 +30,30 @@ type CampaignStatus = "Funding" | "Successful" | "Failed" | "Withdrawn";
 function CampaignDetailPage() {
   const { address } = useParams<{ address: Address }>();
 
-  const location = useLocation();
-  const navigate = useNavigate();
+  // Fetch campaign data directly from blockchain
+  const { campaign, isLoading: isCampaignLoading, error: campaignError, refetch } = useCampaignDetails(address);
 
-  const { contributeToCampaign, txState: contributionTxState, isPending: isContributionPending, isConfirming: isContributionConfirming, isSuccess: isContributionSuccess, writeError: contributionError } = useCampaignContribution();
+  // Transaction hooks
+  const { contributeToCampaign, txState: contributionTxState, isSuccess: isContributionSuccess, writeError: contributionError } = useCampaignContribution();
+  const { finalizeCampaign, txState: finalizeTxState, isSuccess: isFinalizeSuccess, error: finalizeError } = useFinalizeCampaign();
+  const { withdrawFunds, txState: withdrawTxState, isSuccess: isWithdrawSuccess, error: withdrawError } = useWithdrawCampaign();
+  const { claimRefund, txState: refundTxState, isSuccess: isRefundSuccess, error: refundError } = useRefundCampaign();
 
-
-  // Get campaign from router state, or null if not passed
-  const campaign = (location.state as { campaign?: CampaignDetailsUI })?.campaign;
-
-  // If no campaign data, redirect back to home (in Phase 4, we'll fetch from blockchain)
-  useEffect(() => {
-    if (!campaign) {
-      console.warn("No campaign data found, redirecting to home");
-      navigate("/");
-    }
-  }, [campaign, navigate]);
-
+  // State hooks
   const [contributionAmount, setContributionAmount] = useState("");
   const [timeRemaining, setTimeRemaining] = useState("");
-  const [isContributing, setIsContributing] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-  // Mock connected wallet (will come from wallet context in Phase 3)
-  const { isConnected, address: connectedAddress } = useAccount(); // change name to avoid conflict
+  // Get connected wallet
+  const { isConnected, address: connectedAddress } = useAccount();
 
-  // Early return if no campaign
-  if (!campaign) {
-    return null;
-  }
+  // Get user's contribution for current campaign (must be called before any early returns)
+  const userContributionData: UseUserContributionReturn = useUserContribution(campaign?.address);
 
-  // Calculate if user is creator (mock - will use wallet context later)
-  const isCreator = isConnected &&
-    connectedAddress?.toLowerCase() === campaign.creator.toLowerCase();
-
-  // Calculate progress using utility function
-  const displayProgress =
-    calculateProgressPercentage(campaign.totalRaisedWei, campaign.goal);
-
-  // Calculate estimated reward
-  const estimatedReward = contributionAmount
-    ? (Number(contributionAmount) * campaign.rewardRate).toFixed(2)
-    : "0";
-
-  // Get user's contribution for current campaign 
-  const userContributionData: UseUserContributionReturn = useUserContribution(campaign.address);
-
-  // Countdown timer
+  // Countdown timer - must be called before any early returns
   useEffect(() => {
+    if (!campaign) return;
+
     const updateCountdown = () => {
       const now = Math.floor(Date.now() / 1000);
       const timeLeft = campaign.deadlineTimestamp - now;
@@ -90,7 +75,84 @@ function CampaignDetailPage() {
     const interval = setInterval(updateCountdown, 1000);
 
     return () => clearInterval(interval);
-  }, [campaign.deadlineTimestamp]);
+  }, [campaign]);
+
+  // Refetch data and show toast on successful transactions
+  useEffect(() => {
+    if (isContributionSuccess) {
+      setToast({ message: "Contribution successful! 🎉", type: 'success' });
+      setContributionAmount("");
+      refetch();
+    }
+  }, [isContributionSuccess, refetch]);
+
+  useEffect(() => {
+    if (isFinalizeSuccess) {
+      setToast({ message: "Campaign finalized successfully!", type: 'success' });
+      refetch();
+    }
+  }, [isFinalizeSuccess, refetch]);
+
+  useEffect(() => {
+    if (isWithdrawSuccess) {
+      setToast({ message: "Funds withdrawn successfully! 💰", type: 'success' });
+      refetch();
+    }
+  }, [isWithdrawSuccess, refetch]);
+
+  useEffect(() => {
+    if (isRefundSuccess) {
+      setToast({ message: "Refund claimed successfully!", type: 'success' });
+      refetch();
+    }
+  }, [isRefundSuccess, refetch]);
+
+  // Auto-hide toast after 5 seconds
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
+  // Show loading state
+  if (isCampaignLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  // Show error state
+  if (campaignError || !campaign) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-xl text-red-400 mb-4">Error loading campaign</p>
+          <button
+            onClick={() => window.history.back()}
+            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Calculate if user is creator
+  const isCreator = isConnected &&
+    connectedAddress?.toLowerCase() === campaign.creator.toLowerCase();
+
+  // Calculate progress using utility function
+  const displayProgress =
+    calculateProgressPercentage(campaign.totalRaisedWei, campaign.goal);
+
+  // Calculate estimated reward
+  const estimatedReward = contributionAmount
+    ? (Number(contributionAmount) * campaign.rewardRate).toFixed(2)
+    : "0";
 
   // Status badge styling
   const getStatusBadge = () => {
@@ -110,23 +172,44 @@ function CampaignDetailPage() {
     return "bg-blue-500";
   };
 
-  const
-    handleContribute = async () => {
-      if (!contributionAmount || Number(contributionAmount) <= 0) {
-        alert("Please enter a valid contribution amount");
-        return;
-      }
+  const handleContribute = () => {
+    if (!contributionAmount || Number(contributionAmount) <= 0) {
+      setToast({ message: "Please enter a valid contribution amount", type: 'error' });
+      return;
+    }
 
-      setIsContributing(true);
+    contributeToCampaign({ campaignAddress: campaign.address, amountInEth: contributionAmount });
+  };
 
-      contributeToCampaign({ campaignAddress: campaign.address, amountInEth: contributionAmount });
+  const handleFinalize = () => {
+    finalizeCampaign(campaign.address);
+  };
 
-      setContributionAmount("");
-      setIsContributing(false);
-    };
+  const handleWithdraw = () => {
+    withdrawFunds(campaign.address);
+  };
+
+  const handleRefund = () => {
+    claimRefund(campaign.address);
+  };
+
+  // Check if campaign has ended
+  const hasEnded = timeRemaining === "Ended";
+  const canContribute = campaign.status === "Funding" && !hasEnded && !isCreator;
+  const canFinalize = campaign.status === "Funding" && hasEnded && isCreator;
+  const canWithdraw = campaign.status === "Successful" && isCreator;
+  const canRefund = campaign.status === "Failed" && BigInt(userContributionData.userContribution || "0") > 0n;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg animate-slideIn ${toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+          } text-white font-medium`}>
+          {toast.message}
+        </div>
+      )}
+
       <div className="container mx-auto px-4 py-6 sm:py-8 lg:py-12">
         {/* Header Section */}
         <div className="mb-6 animate-fadeIn">
@@ -237,76 +320,102 @@ function CampaignDetailPage() {
             {/* Contribution Section */}
             <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
               <h2 className="text-xl font-semibold text-white mb-4">
-                Contribute to Campaign
+                {canContribute ? 'Contribute to Campaign' : 'Campaign Status'}
               </h2>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Contribution Amount (ETH)
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={contributionAmount}
-                      onChange={(e) => setContributionAmount(e.target.value)}
-                      placeholder="0.0"
-                      className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">
-                      ETH
-                    </span>
-                  </div>
-                </div>
-
-                {/* <button
-                  onClick={handleContribute}
-                  disabled={isContributing || !contributionAmount}
-                  className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.02] active:scale-[0.98] disabled:scale-100 disabled:shadow-none flex items-center justify-center gap-2"
-                >
-                  {isContributing ? (
-                    <>
-                      <LoadingSpinner size="sm" color="white" />
-                      Contributing...
-                    </>
-                  ) : (
-                    "Contribute Now"
-                  )}
-                </button> */}
-                <TransactionButton
-                  onClick={handleContribute}
-                  label="Contribute Now"
-                  txState={contributionTxState}
-                  error={contributionError}
-                  disabled={isContributing || !contributionAmount}
-                />
-
-
-                <p className="text-xs text-center text-slate-500">
-                  Note: Wallet connection coming in Phase 3
-                </p>
-
-                {/* Reward Calculator */}
-                {contributionAmount && (
-                  <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs text-slate-400">
-                          You will receive
-                        </p>
-                        <p className="text-2xl font-bold text-purple-400">
-                          {estimatedReward} {"REWARD"}
-                        </p>
-                      </div>
-                      <div className="text-3xl">🎁</div>
+              {canContribute ? (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      Contribution Amount (ETH)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={contributionAmount}
+                        onChange={(e) => setContributionAmount(e.target.value)}
+                        placeholder="0.0"
+                        step="0.01"
+                        min="0"
+                        className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">
+                        ETH
+                      </span>
                     </div>
-                    <p className="text-xs text-slate-500 mt-2">
-                      Reward Rate: {campaign.rewardRate}{" "}
-                      {"REWARD"}/ETH
-                    </p>
                   </div>
-                )}
-              </div>
+
+                  <div className="w-full">
+                    <TransactionButton
+                      onClick={handleContribute}
+                      label="Contribute Now"
+                      txState={contributionTxState}
+                      error={contributionError}
+                      disabled={!contributionAmount || !isConnected}
+                    />
+                  </div>
+
+                  {!isConnected && (
+                    <p className="text-xs text-center text-amber-400">
+                      ⚠️ Please connect your wallet to contribute
+                    </p>
+                  )}
+
+                  {/* Reward Calculator */}
+                  {contributionAmount && (
+                    <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-slate-400">
+                            You will receive
+                          </p>
+                          <p className="text-2xl font-bold text-purple-400">
+                            {estimatedReward} {"REWARD"}
+                          </p>
+                        </div>
+                        <div className="text-3xl">🎁</div>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-2">
+                        Reward Rate: {campaign.rewardRate}{" "}
+                        {"REWARD"}/ETH
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  {campaign.status === "Funding" && hasEnded && (
+                    <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
+                      <p className="text-amber-400 font-medium">⏰ Campaign has ended</p>
+                      <p className="text-sm text-slate-400 mt-2">Waiting for finalization...</p>
+                    </div>
+                  )}
+                  {campaign.status === "Successful" && (
+                    <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
+                      <p className="text-green-400 font-medium text-lg mb-2">✅ Campaign Successful!</p>
+                      <p className="text-sm text-slate-400">Goal reached! Creator can withdraw funds.</p>
+                    </div>
+                  )}
+                  {campaign.status === "Failed" && BigInt(userContributionData.userContribution || "0") === 0n && (
+                    <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+                      <p className="text-red-400 font-medium text-lg mb-2">❌ Campaign Failed</p>
+                      <p className="text-sm text-slate-400">Goal was not reached. Contributors can claim refunds.</p>
+                    </div>
+                  )}
+                  {campaign.status === "Withdrawn" && (
+                    <div className="bg-slate-500/10 border border-slate-500/30 rounded-lg p-4">
+                      <p className="text-slate-400 font-medium text-lg mb-2">💰 Funds Withdrawn</p>
+                      <p className="text-sm text-slate-400">Creator has withdrawn all funds.</p>
+                    </div>
+                  )}
+                  {isCreator && campaign.status === "Funding" && !hasEnded && (
+                    <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                      <p className="text-blue-400 font-medium">🚀 Campaign is Active</p>
+                      <p className="text-sm text-slate-400 mt-2">As the creator, you cannot contribute to your own campaign.</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Creator Actions (Conditional) */}
@@ -331,18 +440,26 @@ function CampaignDetailPage() {
                     </p>
                   </div>
 
-                  {campaign.status === "Funding" &&
-                    timeRemaining === "Ended" && (
-                      <button className="w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors">
-                        Finalize Campaign
-                      </button>
-                    )}
+                  {canFinalize && (
+                    <div className="w-full">
+                      <TransactionButton
+                        onClick={handleFinalize}
+                        label="Finalize Campaign"
+                        txState={finalizeTxState}
+                        error={finalizeError}
+                      />
+                    </div>
+                  )}
 
-                  {campaign.status === "Successful" && (
-                    <button className="w-full px-4 py-2.5 bg-green-600 hover:bg-green-500 text-white font-medium rounded-lg transition-colors">
-                      Withdraw Funds (
-                      {formatWeiToEther(campaign.totalRaisedWei, 2)} ETH)
-                    </button>
+                  {canWithdraw && (
+                    <div className="w-full">
+                      <TransactionButton
+                        onClick={handleWithdraw}
+                        label={`Withdraw Funds (${formatWeiToEther(campaign.totalRaisedWei, 2)} ETH)`}
+                        txState={withdrawTxState}
+                        error={withdrawError}
+                      />
+                    </div>
                   )}
 
                   {campaign.status === "Withdrawn" && (
@@ -358,32 +475,36 @@ function CampaignDetailPage() {
             )}
 
             {/* Refund Section (Conditional - for failed campaigns) */}
-            {campaign.status === "Failed" &&
-              BigInt(userContributionData.userContribution || "0") > 0n && (
-                <div className="bg-slate-800/50 backdrop-blur-sm border border-red-700/50 rounded-xl p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-2xl">🔄</span>
-                    <h2 className="text-xl font-semibold text-white">
-                      Refund Available
-                    </h2>
-                  </div>
-
-                  <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-4">
-                    <p className="text-sm text-red-300 mb-2">
-                      This campaign failed to reach its goal. You can claim a
-                      refund.
-                    </p>
-                    <p className="text-lg font-semibold text-white">
-                      Your Contribution:{" "}
-                      {formatWeiToEther(userContributionData.userContribution || "0", 4)} ETH
-                    </p>
-                  </div>
-
-                  <button className="w-full px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white font-medium rounded-lg transition-colors">
-                    Claim Refund
-                  </button>
+            {canRefund && (
+              <div className="bg-slate-800/50 backdrop-blur-sm border border-red-700/50 rounded-xl p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-2xl">🔄</span>
+                  <h2 className="text-xl font-semibold text-white">
+                    Refund Available
+                  </h2>
                 </div>
-              )}
+
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-red-300 mb-2">
+                    This campaign failed to reach its goal. You can claim a
+                    refund.
+                  </p>
+                  <p className="text-lg font-semibold text-white">
+                    Your Contribution:{" "}
+                    {formatWeiToEther(userContributionData.userContribution || "0", 4)} ETH
+                  </p>
+                </div>
+
+                <div className="w-full">
+                  <TransactionButton
+                    onClick={handleRefund}
+                    label="Claim Refund"
+                    txState={refundTxState}
+                    error={refundError}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right Column - Sidebar */}

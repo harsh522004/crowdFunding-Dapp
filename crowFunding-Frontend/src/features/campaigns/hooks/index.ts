@@ -5,3 +5,5 @@ export {useCampaignDetailsBatch, type UseCampaignDetailsBatchReturn} from "./use
 export { useUserContribution, type UseUserContributionReturn } from "./useUserContribution";
 export {useCreateCampaign , type CreateCmpaignInput} from "./useCreateCampaign";
 export { useCampaignContribution, type ContributionInput } from "./useCampaignContribution";
+export { useCampaignDetails, type UseCampaignDetailsReturn } from "./useCampaignDetails";
+export { useFinalizeCampaign, useWithdrawCampaign, useRefundCampaign } from "./useCampaignActions";

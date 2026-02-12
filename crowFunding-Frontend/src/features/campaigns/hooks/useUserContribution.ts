@@ -11,7 +11,7 @@ export type UseUserContributionReturn = {
   error: Error | null;
 };
 
-export function useUserContribution( contractAddress: Address) {
+export function useUserContribution( contractAddress: Address | undefined) {
   const { address  }  = useAccount(); 
     const { data, isLoading, error }  = useReadContract({
     abi: masterABI,

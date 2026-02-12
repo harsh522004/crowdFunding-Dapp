@@ -22,58 +22,92 @@ function CreateCampaignPage() {
     tokensPerEth: '',
   });
 
-  // Validation function
-  const validateForm = () => {
-    const newErrors = {
-      goal: '',
-      duration: '',
-      tokensPerEth: '',
-    };
-
-    let isValid = true;
-
-    // Validate Goal
-    if (!goal) {
-      newErrors.goal = 'Goal is required';
-      isValid = false;
-    } else if (Number(goal) <= 0) {
-      newErrors.goal = 'Goal must be greater than 0';
-      isValid = false;
-    } else if (Number(goal) > 1000) {
-      newErrors.goal = 'Goal seems too high (max 1000 ETH)';
-      isValid = false;
+  // Individual field validation functions
+  const validateGoal = (value: string) => {
+    if (!value) {
+      return 'Goal is required';
+    } else if (Number(value) <= 0) {
+      return 'Goal must be greater than 0';
+    } else if (isNaN(Number(value))) {
+      return 'Please enter a valid number';
+    } else if (Number(value) > 1000) {
+      return 'Goal seems too high (max 1000 ETH)';
     }
+    return '';
+  };
 
-    // Validate Duration
-    if (!duration) {
-      newErrors.duration = 'Duration is required';
-      isValid = false;
-    } else if (Number(duration) <= 0) {
-      newErrors.duration = 'Duration must be greater than 0';
-      isValid = false;
-    } else if (Number(duration) > 365) {
-      newErrors.duration = 'Duration cannot exceed 365 days';
-      isValid = false;
+  const validateDuration = (value: string) => {
+    if (!value) {
+      return 'Duration is required';
+    } else if (Number(value) <= 0) {
+      return 'Duration must be greater than 0';
+    } else if (isNaN(Number(value))) {
+      return 'Please enter a valid number';
+    } else if (Number(value) > 365) {
+      return 'Duration cannot exceed 365 days';
+    } else if (!Number.isInteger(Number(value))) {
+      return 'Duration must be a whole number';
     }
+    return '';
+  };
 
-    // Validate Tokens Per ETH
-    if (!tokensPerEth) {
-      newErrors.tokensPerEth = 'Reward rate is required';
-      isValid = false;
-    } else if (Number(tokensPerEth) <= 0) {
-      newErrors.tokensPerEth = 'Reward rate must be greater than 0';
-      isValid = false;
+  const validateTokensPerEth = (value: string) => {
+    if (!value) {
+      return 'Reward rate is required';
+    } else if (Number(value) <= 0) {
+      return 'Reward rate must be greater than 0';
+    } else if (isNaN(Number(value))) {
+      return 'Please enter a valid number';
+    } else if (!Number.isInteger(Number(value))) {
+      return 'Reward rate must be a whole number';
     }
+    return '';
+  };
 
-    setErrors(newErrors);
-    return isValid;
+  // Handle field changes with real-time validation
+  const handleGoalChange = (value: string) => {
+    setGoal(value);
+    setErrors(prev => ({ ...prev, goal: validateGoal(value) }));
+  };
+
+  const handleDurationChange = (value: string) => {
+    setDuration(value);
+    setErrors(prev => ({ ...prev, duration: validateDuration(value) }));
+  };
+
+  const handleTokensPerEthChange = (value: string) => {
+    setTokensPerEth(value);
+    setErrors(prev => ({ ...prev, tokensPerEth: validateTokensPerEth(value) }));
+  };
+
+  // Check if form is valid
+  const isFormValid = () => {
+    return (
+      goal !== '' &&
+      duration !== '' &&
+      tokensPerEth !== '' &&
+      !errors.goal &&
+      !errors.duration &&
+      !errors.tokensPerEth
+    );
   };
 
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (validateForm()) {
+    // Validate all fields one more time before submission
+    const goalError = validateGoal(goal);
+    const durationError = validateDuration(duration);
+    const tokensError = validateTokensPerEth(tokensPerEth);
+
+    setErrors({
+      goal: goalError,
+      duration: durationError,
+      tokensPerEth: tokensError,
+    });
+
+    if (!goalError && !durationError && !tokensError) {
       createCampaign({
         goalInEth: goal,
         durationInDays: duration,
@@ -120,9 +154,10 @@ function CreateCampaignPage() {
                     type="number"
                     id="goal"
                     value={goal}
-                    onChange={(e) => setGoal(e.target.value)}
+                    onChange={(e) => handleGoalChange(e.target.value)}
                     placeholder="e.g., 10"
                     step="0.01"
+                    min="0"
                     className={`w-full px-4 py-3 bg-slate-900/50 border ${errors.goal ? 'border-red-500' : 'border-slate-600'
                       } rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
                   />
@@ -150,9 +185,10 @@ function CreateCampaignPage() {
                     type="number"
                     id="duration"
                     value={duration}
-                    onChange={(e) => setDuration(e.target.value)}
+                    onChange={(e) => handleDurationChange(e.target.value)}
                     placeholder="e.g., 30"
                     step="1"
+                    min="0"
                     className={`w-full px-4 py-3 bg-slate-900/50 border ${errors.duration ? 'border-red-500' : 'border-slate-600'
                       } rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
                   />
@@ -180,9 +216,10 @@ function CreateCampaignPage() {
                     type="number"
                     id="tokensPerEth"
                     value={tokensPerEth}
-                    onChange={(e) => setTokensPerEth(e.target.value)}
+                    onChange={(e) => handleTokensPerEthChange(e.target.value)}
                     placeholder="e.g., 100"
                     step="1"
+                    min="0"
                     className={`w-full px-4 py-3 bg-slate-900/50 border ${errors.tokensPerEth ? 'border-red-500' : 'border-slate-600'
                       } rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
                   />
@@ -228,14 +265,13 @@ function CreateCampaignPage() {
                       ⚠️ Please connect your wallet to create a campaign.
                     </p>
                   ) : (
-
                     <TransactionButton
                       onClick={() => handleSubmit({} as React.FormEvent)}
                       label='Create Campaign'
                       txState={txState}
                       txHash={txHash}
                       error={error}
-                      disabled={goal === '' || duration === '' || tokensPerEth === '' || Object.values(errors).some((err) => err !== '')}
+                      disabled={!isFormValid()}
                       fullWidth
                     />
 
@@ -282,8 +318,8 @@ function CreateCampaignPage() {
             </ul>
           </div>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }
 
