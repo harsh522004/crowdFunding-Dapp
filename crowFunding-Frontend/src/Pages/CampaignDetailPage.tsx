@@ -602,7 +602,7 @@ function CampaignDetailPage() {
                 </div>
 
                 <p className="text-xs text-center text-slate-500 pt-2">
-                  Mock data - Real activity in Phase 4
+                  Mock data
                 </p>
               </div>
             </div>

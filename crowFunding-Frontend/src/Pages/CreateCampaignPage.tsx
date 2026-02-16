@@ -290,11 +290,6 @@ function CreateCampaignPage() {
                     </div>
                   </div>
                 )}
-
-
-                <p className="mt-3 text-xs text-center text-slate-500">
-                  Note: Wallet connection and blockchain integration coming in Phase 3 & 5
-                </p>
               </div>
             </form>
           </div>
