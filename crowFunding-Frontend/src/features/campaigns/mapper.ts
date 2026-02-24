@@ -14,6 +14,8 @@ export const mapCampaignDetails = (
   return {
     address: address as CampaignDetailsUI["address"],
     creator: raw.creator,
+    title: raw.title,
+    description: raw.description,
     goal: raw.goal.toString(),
     deadlineTimestamp: Number(raw.deadline),
     totalRaisedWei: raw.totalRaised.toString(),

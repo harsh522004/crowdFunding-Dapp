@@ -8,6 +8,8 @@ import type { TransactionState } from "../../../components/TransactionButton";
 
 
 export type CreateCmpaignInput = {
+    title: string;
+    description: string;
     goalInEth : string;
     durationInDays : string;
     tokensPerEth : string ;
@@ -29,8 +31,8 @@ export function useCreateCampaign() {
         writeContract({
             address: CONTRACTS.factory as Address,
             abi: factoryABI,
-            functionName: "createClone",
-            args: [goalInEth, durationInSeconds, tokensPerEth],
+            functionName: "createCampaign",
+            args: [inputData.title, inputData.description, goalInEth, durationInSeconds, tokensPerEth],
         });
     };
 
@@ -55,7 +57,7 @@ export function useCreateCampaign() {
                     data : campaignCreatedLog.data,
                     topics : campaignCreatedLog.topics,
                 });
-                const campaignAddress = decoded.args.compaign as Address;
+                const campaignAddress = decoded.args.campaignAddress as Address;
                 setNewCampaignAddress(campaignAddress);
             }
         }

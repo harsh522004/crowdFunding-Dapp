@@ -41,6 +41,8 @@ export function useCampaignDetails(
     // Destructure the tuple returned from contract
     const [
       creator,
+      title,
+      description,
       goal,
       deadline,
       totalRaised,
@@ -49,6 +51,8 @@ export function useCampaignDetails(
       rewardPerEth,
     ] = data as readonly [
       Address,
+      string,
+      string,
       bigint,
       bigint,
       bigint,
@@ -59,6 +63,8 @@ export function useCampaignDetails(
 
     raw = {
       creator,
+      title,
+      description,
       goal,
       deadline,
       totalRaised,

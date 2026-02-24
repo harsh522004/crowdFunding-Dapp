@@ -34,6 +34,8 @@ export function useCampaignDetailsBatch(
         // Solidity returns tuple as array, so we need to destructure it
         const [
           creator,
+          title,
+          description,
           goal,
           deadline,
           totalRaised,
@@ -42,6 +44,8 @@ export function useCampaignDetailsBatch(
           rewardPerEth,
         ] = result.result as readonly [
           `0x${string}`,
+          string,
+          string,
           bigint,
           bigint,
           bigint,
@@ -52,6 +56,8 @@ export function useCampaignDetailsBatch(
 
         dataMap[address] = {
           creator,
+          title,
+          description,
           goal,
           deadline,
           totalRaised,

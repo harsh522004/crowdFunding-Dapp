@@ -2,6 +2,8 @@
 import type { Address } from "viem";
 export type CampaignDetailsRaw = {
   creator: Address; // address
+  title: string; // string
+  description: string; // string
   goal: bigint; // uint256
   deadline: bigint; // uint256 (timestamp)
   totalRaised: bigint; // uint256
@@ -14,6 +16,8 @@ export type CampaignDetailsRaw = {
 export type CampaignDetailsUI = {
   address: Address;
   creator: Address;
+  title: string;
+  description: string;
   goal: string;
   deadlineTimestamp: number;
   totalRaisedWei: string;

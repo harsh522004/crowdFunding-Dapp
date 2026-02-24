@@ -11,18 +11,44 @@ function CreateCampaignPage() {
   const { createCampaign, newCampaignAddress, txState, txHash, isSuccess, error } = useCreateCampaign();
 
   // Form state
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
   const [goal, setGoal] = useState('');
   const [duration, setDuration] = useState('');
   const [tokensPerEth, setTokensPerEth] = useState('');
 
   // Error state
   const [errors, setErrors] = useState({
+    title: '',
+    description: '',
     goal: '',
     duration: '',
     tokensPerEth: '',
   });
 
   // Individual field validation functions
+  const validateTitle = (value: string) => {
+    if (!value) {
+      return 'Title is required';
+    } else if (value.length < 3) {
+      return 'Title must be at least 3 characters';
+    } else if (value.length > 100) {
+      return 'Title cannot exceed 100 characters';
+    }
+    return '';
+  };
+
+  const validateDescription = (value: string) => {
+    if (!value) {
+      return 'Description is required';
+    } else if (value.length < 10) {
+      return 'Description must be at least 10 characters';
+    } else if (value.length > 500) {
+      return 'Description cannot exceed 500 characters';
+    }
+    return '';
+  };
+
   const validateGoal = (value: string) => {
     if (!value) {
       return 'Goal is required';
@@ -65,6 +91,16 @@ function CreateCampaignPage() {
   };
 
   // Handle field changes with real-time validation
+  const handleTitleChange = (value: string) => {
+    setTitle(value);
+    setErrors(prev => ({ ...prev, title: validateTitle(value) }));
+  };
+
+  const handleDescriptionChange = (value: string) => {
+    setDescription(value);
+    setErrors(prev => ({ ...prev, description: validateDescription(value) }));
+  };
+
   const handleGoalChange = (value: string) => {
     setGoal(value);
     setErrors(prev => ({ ...prev, goal: validateGoal(value) }));
@@ -83,9 +119,13 @@ function CreateCampaignPage() {
   // Check if form is valid
   const isFormValid = () => {
     return (
+      title !== '' &&
+      description !== '' &&
       goal !== '' &&
       duration !== '' &&
       tokensPerEth !== '' &&
+      !errors.title &&
+      !errors.description &&
       !errors.goal &&
       !errors.duration &&
       !errors.tokensPerEth
@@ -97,18 +137,24 @@ function CreateCampaignPage() {
     e.preventDefault();
 
     // Validate all fields one more time before submission
+    const titleError = validateTitle(title);
+    const descriptionError = validateDescription(description);
     const goalError = validateGoal(goal);
     const durationError = validateDuration(duration);
     const tokensError = validateTokensPerEth(tokensPerEth);
 
     setErrors({
+      title: titleError,
+      description: descriptionError,
       goal: goalError,
       duration: durationError,
       tokensPerEth: tokensError,
     });
 
-    if (!goalError && !durationError && !tokensError) {
+    if (!titleError && !descriptionError && !goalError && !durationError && !tokensError) {
       createCampaign({
+        title: title,
+        description: description,
         goalInEth: goal,
         durationInDays: duration,
         tokensPerEth: tokensPerEth,
@@ -143,6 +189,56 @@ function CreateCampaignPage() {
         <div className="max-w-2xl mx-auto animate-fadeIn">
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
+
+              {/* Title Field */}
+              <div>
+                <label htmlFor="title" className="block text-sm font-medium text-slate-300 mb-2">
+                  Campaign Title <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="title"
+                  value={title}
+                  onChange={(e) => handleTitleChange(e.target.value)}
+                  placeholder="e.g., Build a Community Center"
+                  maxLength={100}
+                  className={`w-full px-4 py-3 bg-slate-900/50 border ${errors.title ? 'border-red-500' : 'border-slate-600'
+                    } rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
+                />
+                {errors.title && (
+                  <p className="mt-1 text-sm text-red-400 flex items-center gap-1">
+                    <span>⚠️</span> {errors.title}
+                  </p>
+                )}
+                <p className="mt-1 text-xs text-slate-500">
+                  A catchy title for your campaign (3-100 characters)
+                </p>
+              </div>
+
+              {/* Description Field */}
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium text-slate-300 mb-2">
+                  Description <span className="text-red-400">*</span>
+                </label>
+                <textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => handleDescriptionChange(e.target.value)}
+                  placeholder="Describe your project, its goals, and how the funds will be used..."
+                  maxLength={500}
+                  rows={4}
+                  className={`w-full px-4 py-3 bg-slate-900/50 border ${errors.description ? 'border-red-500' : 'border-slate-600'
+                    } rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none`}
+                />
+                {errors.description && (
+                  <p className="mt-1 text-sm text-red-400 flex items-center gap-1">
+                    <span>⚠️</span> {errors.description}
+                  </p>
+                )}
+                <p className="mt-1 text-xs text-slate-500">
+                  {description.length}/500 characters - Tell potential contributors about your project
+                </p>
+              </div>
 
               {/* Goal Field */}
               <div>
@@ -244,6 +340,8 @@ function CreateCampaignPage() {
                   <div>
                     <p className="text-sm text-blue-300 font-medium mb-1">Campaign Preview</p>
                     <ul className="text-xs text-slate-400 space-y-1">
+                      <li>• Title: {title || 'Not set'}</li>
+                      <li>• Description: {description ? `${description.substring(0, 50)}...` : 'Not set'}</li>
                       <li>• Goal: {goal || '0'} ETH</li>
                       <li>• Duration: {duration || '0'} days</li>
                       <li>• Reward: {tokensPerEth || '0'} tokens per ETH contributed</li>

@@ -43,19 +43,29 @@ function CampaignCard(props: CampaignCardProps) {
         className="h-full bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 hover:border-blue-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 cursor-pointer"
         onClick={props.onMoreDetails}
       >
-        {/* Header with Address and Status */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
-            <p className="text-xs text-slate-500 mb-1">Campaign Address</p>
-            <p className="text-sm font-mono text-slate-300">
-              {shortenAddress(props.campaign.address)}
-            </p>
-          </div>
+        {/* Header with Title and Status */}
+        <div className="flex items-start justify-between mb-3">
+          <h3 className="text-lg font-bold text-white flex-1 pr-2 line-clamp-1">
+            {props.campaign.title}
+          </h3>
           <span
-            className={`px-3 py-1 text-xs font-medium rounded-full border ${getStatusBadge()}`}
+            className={`px-3 py-1 text-xs font-medium rounded-full border ${getStatusBadge()} whitespace-nowrap`}
           >
             {props.campaign.status}
           </span>
+        </div>
+
+        {/* Description */}
+        <p className="text-sm text-slate-400 mb-4 line-clamp-2">
+          {props.campaign.description}
+        </p>
+
+        {/* Address */}
+        <div className="mb-4">
+          <p className="text-xs text-slate-500 mb-1">Campaign Address</p>
+          <p className="text-xs font-mono text-slate-300">
+            {shortenAddress(props.campaign.address)}
+          </p>
         </div>
 
         {/* Funding Progress */}

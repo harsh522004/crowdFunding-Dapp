@@ -17,7 +17,10 @@ import {
   useCampaignDetails,
   useFinalizeCampaign,
   useWithdrawCampaign,
-  useRefundCampaign
+  useRefundCampaign,
+  useContributorsCount,
+  useRecentContributions,
+  type ContributionRecord,
 } from "../features/campaigns/hooks";
 import TransactionButton from "../components/TransactionButton";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -49,6 +52,10 @@ function CampaignDetailPage() {
 
   // Get user's contribution for current campaign (must be called before any early returns)
   const userContributionData: UseUserContributionReturn = useUserContribution(campaign?.address);
+
+  // Get contributors count and recent contributions
+  const { contributorsCount } = useContributorsCount(campaign?.address);
+  const { contributions } = useRecentContributions(campaign?.address);
 
   // Countdown timer - must be called before any early returns
   useEffect(() => {
@@ -241,6 +248,16 @@ function CampaignDetailPage() {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left Column - Main Info */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Campaign Title & Description Card */}
+            <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
+              <h2 className="text-2xl font-bold text-white mb-3">
+                {campaign.title}
+              </h2>
+              <p className="text-slate-300 leading-relaxed whitespace-pre-wrap">
+                {campaign.description}
+              </p>
+            </div>
+
             {/* Campaign Stats Card */}
             <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
               <h2 className="text-xl font-semibold text-white mb-6">
@@ -293,11 +310,13 @@ function CampaignDetailPage() {
                   </p>
                   <p className="text-xs text-blue-400 mt-1">{timeRemaining}</p>
                 </div>
-                {/* TODO : needs to update */}
+
                 <div className="bg-slate-900/50 rounded-lg p-4">
                   <p className="text-xs text-slate-500 mb-1">Contributors</p>
-                  <p className="text-sm font-semibold text-slate-300">21</p>
-                  <p className="text-xs text-slate-500 mt-1">Mock data</p>
+                  <p className="text-sm font-semibold text-slate-300">{contributorsCount}</p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {contributorsCount === 1 ? 'Unique contributor' : 'Unique contributors'}
+                  </p>
                 </div>
 
                 <div className="bg-slate-900/50 rounded-lg p-4">
@@ -576,35 +595,46 @@ function CampaignDetailPage() {
                 Recent Activity
               </h3>
 
-              <div className="space-y-3">
-                <div className="text-sm">
-                  <div className="flex justify-between items-start mb-1">
-                    <span className="text-slate-400">Contribution</span>
-                    <span className="text-green-400">+0.5 ETH</span>
-                  </div>
-                  <p className="text-xs text-slate-500">2 hours ago</p>
-                </div>
+              {contributions.length > 0 ? (
+                <div className="space-y-3">
+                  {contributions.map((contribution, index) => {
+                    const timeAgo = (() => {
+                      const now = Math.floor(Date.now() / 1000);
+                      const diff = now - Number(contribution.timestamp);
 
-                <div className="text-sm border-t border-slate-700 pt-3">
-                  <div className="flex justify-between items-start mb-1">
-                    <span className="text-slate-400">Contribution</span>
-                    <span className="text-green-400">+1.2 ETH</span>
-                  </div>
-                  <p className="text-xs text-slate-500">5 hours ago</p>
-                </div>
+                      if (diff < 60) return `${diff} seconds ago`;
+                      if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
+                      if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+                      return `${Math.floor(diff / 86400)} days ago`;
+                    })();
 
-                <div className="text-sm border-t border-slate-700 pt-3">
-                  <div className="flex justify-between items-start mb-1">
-                    <span className="text-slate-400">Contribution</span>
-                    <span className="text-green-400">+0.3 ETH</span>
-                  </div>
-                  <p className="text-xs text-slate-500">1 day ago</p>
+                    return (
+                      <div
+                        key={index}
+                        className={`text-sm ${index > 0 ? 'border-t border-slate-700 pt-3' : ''}`}
+                      >
+                        <div className="flex justify-between items-start mb-1">
+                          <div>
+                            <span className="text-slate-400">Contribution</span>
+                            <p className="text-xs text-slate-500 font-mono mt-0.5">
+                              {shortenAddress(contribution.contributor)}
+                            </p>
+                          </div>
+                          <span className="text-green-400 font-semibold">
+                            +{formatWeiToEther(contribution.amount.toString(), 3)} ETH
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500">{timeAgo}</p>
+                      </div>
+                    );
+                  })}
                 </div>
-
-                <p className="text-xs text-center text-slate-500 pt-2">
-                  Mock data
-                </p>
-              </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-sm text-slate-400">No contributions yet</p>
+                  <p className="text-xs text-slate-500 mt-1">Be the first to contribute!</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

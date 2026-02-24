@@ -7,3 +7,5 @@ export {useCreateCampaign , type CreateCmpaignInput} from "./useCreateCampaign";
 export { useCampaignContribution, type ContributionInput } from "./useCampaignContribution";
 export { useCampaignDetails, type UseCampaignDetailsReturn } from "./useCampaignDetails";
 export { useFinalizeCampaign, useWithdrawCampaign, useRefundCampaign } from "./useCampaignActions";
+export { useContributorsCount, type UseContributorsCountReturn } from "./useContributorsCount";
+export { useRecentContributions, type UseRecentContributionsReturn, type ContributionRecord } from "./useRecentContributions";
