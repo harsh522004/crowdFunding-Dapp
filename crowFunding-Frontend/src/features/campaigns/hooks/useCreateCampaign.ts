@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { decodeEventLog, type Address } from "viem";
+import { decodeEventLog, type Address, parseUnits } from "viem";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { CONTRACTS } from "../../../contracts/config";
 import { factoryABI } from "../../../contracts/ABI/FactoryABI";
@@ -26,7 +26,7 @@ export function useCreateCampaign() {
     const createCampaign = (inputData: CreateCmpaignInput) => {
         const durationInSeconds: bigint = BigInt(Number(inputData.durationInDays) * 24 * 60 * 60);
         const goalInEth = formatEtherToWei(inputData.goalInEth);
-        const tokensPerEth: bigint = BigInt(inputData.tokensPerEth);
+        const tokensPerEth: bigint = parseUnits(inputData.tokensPerEth, 18);
         
         writeContract({
             address: CONTRACTS.factory as Address,
@@ -57,8 +57,10 @@ export function useCreateCampaign() {
                     data : campaignCreatedLog.data,
                     topics : campaignCreatedLog.topics,
                 });
-                const campaignAddress = decoded.args.campaignAddress as Address;
-                setNewCampaignAddress(campaignAddress);
+                if ('campaignAddress' in decoded.args) {
+                    const campaignAddress = decoded.args.campaignAddress as Address;
+                    setNewCampaignAddress(campaignAddress);
+                }
             }
         }
     }, [isSuccess, receipt]);

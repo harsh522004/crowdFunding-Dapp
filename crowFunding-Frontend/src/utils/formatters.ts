@@ -1,4 +1,4 @@
-import {formatEther, parseEther} from "viem";
+import {formatEther, parseEther, formatUnits, parseUnits} from "viem";
 // Enum for campaign states
 export const StateEnum = {
     Funding : 0,
@@ -26,6 +26,16 @@ export const formatEtherToWei = (ether: string): bigint => {
   const wei = parseEther(ether);
   return wei;
 }
+
+// Function to format token amount from wei to human-readable (with decimals)
+export const formatTokenAmount = (amount: bigint, decimals = 18): string => {
+  return formatUnits(amount, decimals);
+};
+
+// Function to parse token amount from human-readable to wei (with decimals)
+export const parseTokenAmount = (amount: string, decimals = 18): bigint => {
+  return parseUnits(amount, decimals);
+};
 // function to format timestamp to readable date
 export const formatTimestampToDate = (timestamp: number): string => {
   const date = new Date(timestamp * 1000);

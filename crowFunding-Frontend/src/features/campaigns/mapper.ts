@@ -1,3 +1,4 @@
+import { formatUnits } from "viem";
 import type { CampaignDetailsRaw, CampaignDetailsUI } from "./type";
 
 // Return "UI" friendly campaign details from raw blockchain data
@@ -20,6 +21,6 @@ export const mapCampaignDetails = (
     deadlineTimestamp: Number(raw.deadline),
     totalRaisedWei: raw.totalRaised.toString(),
     status: statusMap[raw.state],
-    rewardRate: Number(raw.rewardPerEth),
+    rewardRate: Number(formatUnits(raw.rewardPerEth, 18)),
   };
 };
