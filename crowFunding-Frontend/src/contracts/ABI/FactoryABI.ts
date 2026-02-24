@@ -37,12 +37,34 @@ export const factoryABI = [
       "type": "error"
     },
     {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnableInvalidOwner",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "OwnableUnauthorizedAccount",
+      "type": "error"
+    },
+    {
       "anonymous": false,
       "inputs": [
         {
           "indexed": true,
           "internalType": "address",
-          "name": "compaign",
+          "name": "campaignAddress",
           "type": "address"
         },
         {
@@ -50,6 +72,12 @@ export const factoryABI = [
           "internalType": "address",
           "name": "creator",
           "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "title",
+          "type": "string"
         },
         {
           "indexed": false,
@@ -62,39 +90,67 @@ export const factoryABI = [
           "internalType": "uint256",
           "name": "deadline",
           "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tokensPerEth",
+          "type": "uint256"
         }
       ],
       "name": "CampaignCreated",
       "type": "event"
     },
     {
-      "inputs": [],
-      "name": "adminAddress",
-      "outputs": [
+      "anonymous": false,
+      "inputs": [
         {
+          "indexed": true,
           "internalType": "address",
-          "name": "",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
           "type": "address"
         }
       ],
-      "stateMutability": "view",
-      "type": "function"
+      "name": "OwnershipTransferred",
+      "type": "event"
     },
     {
-      "inputs": [],
-      "name": "campaignsCount",
-      "outputs": [
+      "anonymous": false,
+      "inputs": [
         {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
+          "indexed": true,
+          "internalType": "address",
+          "name": "oldToken",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newToken",
+          "type": "address"
         }
       ],
-      "stateMutability": "view",
-      "type": "function"
+      "name": "TokenUpdated",
+      "type": "event"
     },
     {
       "inputs": [
+        {
+          "internalType": "string",
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "description",
+          "type": "string"
+        },
         {
           "internalType": "uint256",
           "name": "goal",
@@ -111,8 +167,14 @@ export const factoryABI = [
           "type": "uint256"
         }
       ],
-      "name": "createClone",
-      "outputs": [],
+      "name": "createCampaign",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "campaignAddress",
+          "type": "address"
+        }
+      ],
       "stateMutability": "nonpayable",
       "type": "function"
     },
@@ -148,6 +210,19 @@ export const factoryABI = [
       "type": "function"
     },
     {
+      "inputs": [],
+      "name": "getCampaignsCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "address",
@@ -174,7 +249,7 @@ export const factoryABI = [
           "type": "uint256"
         }
       ],
-      "name": "getRecent",
+      "name": "getRecentCampaigns",
       "outputs": [
         {
           "internalType": "address[]",
@@ -206,7 +281,7 @@ export const factoryABI = [
           "type": "address"
         }
       ],
-      "name": "isClone",
+      "name": "isValidCampaign",
       "outputs": [
         {
           "internalType": "bool",
@@ -215,6 +290,26 @@ export const factoryABI = [
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -229,5 +324,31 @@ export const factoryABI = [
       ],
       "stateMutability": "view",
       "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_newToken",
+          "type": "address"
+        }
+      ],
+      "name": "updateToken",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     }
-  ] as const
+] as const

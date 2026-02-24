@@ -1,77 +1,90 @@
 import { network } from "hardhat";
 
+const { ethers, networkName } = await network.connect();
 
-const {ethers , networkName } = await network.connect();
-
-
-
-async function displayInfo (){
-
+async function displayInfo() {
     // Network
-    console.log(`Connected to network: ${networkName}`);
+    console.log(`\n📡 Connected to network: ${networkName}`);
 
     // Deployer
     const [deployer] = await ethers.getSigners();
-    console.log(`Deploying contracts with the account: ${deployer.address}`);
+    console.log(`👤 Deploying contracts with account: ${deployer.address}`);
 
-    // balance of ETH
+    // Balance of ETH
     const balance = await ethers.provider.getBalance(deployer.address);
-    console.log(`Account balance: ${ethers.formatEther(balance)} ETH`);
+    console.log(`💰 Account balance: ${ethers.formatEther(balance)} ETH\n`);
 }
 
-async function deployToken(): Promise<string>{
+async function deployToken(): Promise<string> {
+    console.log("🪙  Deploying Karma Token...");
     const tokenContract = await ethers.deployContract("Karma");
     await tokenContract.waitForDeployment();
-    const address : string = await tokenContract.getAddress();
-    console.log(`Deplyed Token contract at : ${address}`);
+    const address: string = await tokenContract.getAddress();
+    console.log(`✅ Token deployed at: ${address}\n`);
     return address;
 }
 
+// Function to deploy Campaign (Master) contract
+async function deployCampaign(): Promise<string> {
+    console.log("📋 Deploying CrowdFundingCampaign (Implementation)...");
+    const campaignContract = await ethers.deployContract("CrowdFundingCampaign");
+    await campaignContract.waitForDeployment();
 
-// Function to deploy Master contract
-async function deployMaster(): Promise<string>{
-    const masterContract = await ethers.deployContract("CrowdFundingCampaign");
-    await masterContract.waitForDeployment();
-
-    const address: string = await masterContract.getAddress();
-    // address of master contract 
-    console.log(`Deplyed Master contract at : ${address}`);
+    const address: string = await campaignContract.getAddress();
+    console.log(`✅ Campaign Implementation deployed at: ${address}\n`);
     return address;
-
-
 }
 
 // Function to deploy Factory contract
-async function deployFactory(masterContractAddress : string, tokenAddress: string) : Promise<string>{
-  const factoryContract = await ethers.deployContract("CrowdFundingFactory",[masterContractAddress, tokenAddress]);
-  await factoryContract.waitForDeployment();
-  const address: string = await factoryContract.getAddress();
-  console.log(`Deplyed Factory contract at : ${address}`);
-  return address;
+async function deployFactory(
+    campaignImplementation: string,
+    tokenAddress: string
+): Promise<string> {
+    console.log("🏭 Deploying CrowdFundingFactory...");
+    const factoryContract = await ethers.deployContract("CrowdFundingFactory", [
+        campaignImplementation,
+        tokenAddress,
+    ]);
+    await factoryContract.waitForDeployment();
+    const address: string = await factoryContract.getAddress();
+    console.log(`✅ Factory deployed at: ${address}\n`);
+    return address;
 }
 
-
-
 // First entry point
-async function main(){
-    
-    await displayInfo();
-    const tokenAddress : string = "0x058F7515Ecb2993e8E63037506F055a113386F65";
-    const masterAddress : string = await deployMaster();
-    const factoryAddress : string = await deployFactory(masterAddress,tokenAddress);
-    console.log("\n=== Deployment Complete ===");
-    console.log(`Token:   ${tokenAddress}`);
-    console.log(`Master:  ${masterAddress}`);
-    console.log(`Factory: ${factoryAddress}`);
-    console.log(`Network: ${networkName}`);
-    console.log("===========================\n");
+async function main() {
+    console.log("╔════════════════════════════════════════════════╗");
+    console.log("║  CrowdFunding DApp Deployment Script          ║");
+    console.log("╚════════════════════════════════════════════════╝");
 
+    await displayInfo();
+
+    const tokenAddress: string = await deployToken();
+    const campaignImplementation: string = await deployCampaign();
+    const factoryAddress: string = await deployFactory(
+        campaignImplementation,
+        tokenAddress
+    );
+
+    console.log("\n╔════════════════════════════════════════════════╗");
+    console.log("║           DEPLOYMENT COMPLETE ✅                ║");
+    console.log("╚════════════════════════════════════════════════╝\n");
+    console.log("📝 Contract Addresses:");
+    console.log(`   Token (Karma):         ${tokenAddress}`);
+    console.log(`   Campaign (Impl):       ${campaignImplementation}`);
+    console.log(`   Factory:               ${factoryAddress}`);
+    console.log(`   Network:               ${networkName}`);
+    console.log("\n📋 Next Steps:");
+    console.log("   1. Update frontend config.ts with these addresses");
+    console.log("   2. Approve tokens for the factory contract");
+    console.log("   3. Regenerate ABIs if contract interfaces changed");
+    console.log("\n════════════════════════════════════════════════\n");
 }
 
 main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error("Deployment failed:");
-    console.error(error);
-    process.exit(1);
-  });
+    .then(() => process.exit(0))
+    .catch((error) => {
+        console.error("\n❌ Deployment failed:");
+        console.error(error);
+        process.exit(1);
+    });

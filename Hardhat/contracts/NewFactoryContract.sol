@@ -14,12 +14,6 @@ contract CrowdFundingFactory is Ownable {
     mapping(address => address[]) private campaignsOf;
     mapping(address => bool) public isValidCampaign;
 
-    // Constants for validation
-    uint256 public constant MIN_DURATION = 1 days;
-    uint256 public constant MAX_DURATION = 365 days;
-    uint256 public constant MAX_TITLE_LENGTH = 100;
-    uint256 public constant MAX_DESCRIPTION_LENGTH = 1000;
-
     constructor(
         address _implementation,
         address _tokenAddress
@@ -52,28 +46,9 @@ contract CrowdFundingFactory is Ownable {
         uint256 durationSeconds,
         uint256 tokensPerEth
     ) external returns (address campaignAddress) {
-        // Validate string inputs
-        require(bytes(title).length > 0, "Title cannot be empty");
-        require(
-            bytes(title).length <= MAX_TITLE_LENGTH,
-            "Title exceeds max length"
-        );
-        require(bytes(description).length > 0, "Description cannot be empty");
-        require(
-            bytes(description).length <= MAX_DESCRIPTION_LENGTH,
-            "Description exceeds max length"
-        );
-
-        // Validate numeric inputs
+        // Basic validation
         require(goal > 0, "Goal must be greater than 0");
-        require(
-            durationSeconds >= MIN_DURATION,
-            "Duration too short (min 1 day)"
-        );
-        require(
-            durationSeconds <= MAX_DURATION,
-            "Duration too long (max 365 days)"
-        );
+        require(durationSeconds > 0, "Duration must be greater than 0");
         require(tokensPerEth > 0, "Tokens per ETH must be greater than 0");
 
         // Clone the implementation contract
