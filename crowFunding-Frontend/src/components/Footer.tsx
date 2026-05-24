@@ -1,48 +1,86 @@
-const GITHUB_URL = "https://github.com/harsh522004/crowdFunding-Dapp";
-const CONTRACT_URL = "https://sepolia.etherscan.io/address/0x22Fc5B7F7aC04cA58B12D509b0c6eE9E7b6CB5fA";
+import { getAddressUrl } from "../utils/etherscan";
+import { CONTRACTS } from "../contracts/config";
 
 export default function Footer() {
   return (
-    <footer className="mt-20 border-t border-slate-800 bg-slate-900/50">
+    <footer className="border-t border-slate-700 bg-slate-900 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
           {/* Brand */}
-          <div className="text-center md:text-left">
-            <p className="text-lg font-bold text-white">CrowdFund DApp</p>
-            <p className="text-sm text-slate-400 mt-1">
-              Decentralized crowdfunding on Ethereum Sepolia
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">₿</span>
+              </div>
+              <span className="text-white font-bold">CrowdFund</span>
+            </div>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Decentralized crowdfunding on Ethereum. Create campaigns, earn
+              token rewards, secured by smart contracts.
             </p>
           </div>
 
-          {/* Links */}
-          <div className="flex items-center gap-6 text-sm">
-            <a
-              href={GITHUB_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-slate-400 hover:text-white transition-colors"
-            >
-              GitHub
-            </a>
-            <a
-              href={CONTRACT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-slate-400 hover:text-white transition-colors"
-            >
-              Contract
-            </a>
+          {/* Contracts */}
+          <div>
+            <h4 className="text-sm font-semibold text-slate-300 mb-3">
+              Contracts (Sepolia)
+            </h4>
+            <ul className="space-y-2 text-xs text-slate-500">
+              <li>
+                <a
+                  href={getAddressUrl(CONTRACTS.factory)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-blue-400 transition-colors font-mono"
+                >
+                  Factory ↗
+                </a>
+              </li>
+              <li>
+                <a
+                  href={getAddressUrl(CONTRACTS.token)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-blue-400 transition-colors font-mono"
+                >
+                  Karma Token ↗
+                </a>
+              </li>
+            </ul>
           </div>
 
-          {/* Network badge */}
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 rounded-full border border-slate-700">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-xs text-slate-300">Sepolia Testnet</span>
+          {/* Links */}
+          <div>
+            <h4 className="text-sm font-semibold text-slate-300 mb-3">
+              Project
+            </h4>
+            <ul className="space-y-2 text-xs text-slate-500">
+              <li>
+                <a
+                  href="https://github.com/harsh522004/crowdFunding-Dapp"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-blue-400 transition-colors"
+                >
+                  GitHub ↗
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://sepolia.etherscan.io"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-blue-400 transition-colors"
+                >
+                  Sepolia Etherscan ↗
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-slate-800 text-center text-xs text-slate-600">
-          Built with React, Wagmi &amp; Solidity &bull; Open source
+        <div className="border-t border-slate-800 mt-8 pt-6 text-center text-xs text-slate-600">
+          Built on Ethereum · Sepolia Testnet · Open Source
         </div>
       </div>
     </footer>
