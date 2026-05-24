@@ -6,10 +6,19 @@ type EmptyStateProps = {
   description: string;
   actionLabel?: string;
   actionPath?: string;
+  onAction?: () => void;
 };
 
-function EmptyState({ icon, title, description, actionLabel, actionPath }: EmptyStateProps) {
+function EmptyState({ icon, title, description, actionLabel, actionPath, onAction }: EmptyStateProps) {
   const navigate = useNavigate();
+
+  const handleAction = () => {
+    if (onAction) {
+      onAction();
+    } else if (actionPath) {
+      navigate(actionPath);
+    }
+  };
 
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4">
@@ -24,9 +33,9 @@ function EmptyState({ icon, title, description, actionLabel, actionPath }: Empty
         <p className="text-slate-400 mb-6">{description}</p>
 
         {/* Action Button */}
-        {actionLabel && actionPath && (
+        {actionLabel && (actionPath || onAction) && (
           <button
-            onClick={() => navigate(actionPath)}
+            onClick={handleAction}
             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105"
           >
             {actionLabel}
