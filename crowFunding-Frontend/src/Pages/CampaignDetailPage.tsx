@@ -20,6 +20,7 @@ import {
   useRefundCampaign,
   useContributorsCount,
   useRecentContributions,
+  useTokenInfo,
 } from "../features/campaigns/hooks";
 import TransactionButton from "../components/TransactionButton";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -55,6 +56,11 @@ function CampaignDetailPage() {
   // Get contributors count and recent contributions
   const { contributorsCount } = useContributorsCount(campaign?.address);
   const { contributions } = useRecentContributions(campaign?.address);
+
+  // Fetch live token info (symbol, name) from ERC20 contract
+  const { symbol: tokenSymbol, isLoading: isTokenLoading } = useTokenInfo(
+    CONTRACTS.token as `0x${string}`
+  );
 
   // Countdown timer - must be called before any early returns
   useEffect(() => {
@@ -202,7 +208,7 @@ function CampaignDetailPage() {
   // Check if campaign has ended
   const hasEnded = timeRemaining === "Ended";
   const canContribute = campaign.status === "Funding" && !hasEnded && !isCreator;
-  const canFinalize = campaign.status === "Funding" && hasEnded && isCreator;
+  const canFinalize = campaign.status === "Funding" && hasEnded && isConnected;
   const canWithdraw = campaign.status === "Successful" && isCreator;
   const canRefund = campaign.status === "Failed" && BigInt(userContributionData.userContribution || "0") > 0n;
 
@@ -329,7 +335,7 @@ function CampaignDetailPage() {
                     +
                     {Number(formatWeiToEther(userContributionData.userContribution || "0", 2)) *
                       campaign.rewardRate}{" "}
-                    {"REWARD"}
+                    {tokenSymbol}
                   </p>
                 </div>
               </div>
@@ -388,14 +394,14 @@ function CampaignDetailPage() {
                             You will receive
                           </p>
                           <p className="text-2xl font-bold text-purple-400">
-                            {estimatedReward} {"REWARD"}
+                            {estimatedReward} {tokenSymbol}
                           </p>
                         </div>
                         <div className="text-3xl">🎁</div>
                       </div>
                       <p className="text-xs text-slate-500 mt-2">
                         Reward Rate: {campaign.rewardRate}{" "}
-                        {"REWARD"}/ETH
+                        {tokenSymbol}/ETH
                       </p>
                     </div>
                   )}
@@ -537,7 +543,7 @@ function CampaignDetailPage() {
                 <div>
                   <p className="text-xs text-slate-500 mb-1">Token Symbol</p>
                   <p className="text-sm font-semibold text-purple-400">
-                    {"REWARD"}
+                    {isTokenLoading ? "..." : tokenSymbol}
                   </p>
                 </div>
 
@@ -553,7 +559,7 @@ function CampaignDetailPage() {
                 <div className="pt-3 border-t border-slate-700">
                   <p className="text-xs text-slate-500 mb-1">Reward Rate</p>
                   <p className="text-lg font-bold text-white">
-                    {campaign.rewardRate} {"REWARD"}
+                    {campaign.rewardRate} {tokenSymbol}
                   </p>
                   <p className="text-xs text-slate-500">
                     per 1 ETH contributed
