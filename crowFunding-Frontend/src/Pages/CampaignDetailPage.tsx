@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
+import confetti from "canvas-confetti";
 import {
   formatWeiToEther,
   shortenAddress,
@@ -48,6 +49,7 @@ function CampaignDetailPage() {
   const [contributionAmount, setContributionAmount] = useState("");
   const [timeRemaining, setTimeRemaining] = useState("");
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [shareCopied, setShareCopied] = useState(false);
 
   // Get connected wallet
   const { isConnected, address: connectedAddress } = useAccount();
@@ -97,6 +99,12 @@ function CampaignDetailPage() {
       setToast({ message: "Contribution successful! 🎉", type: 'success' });
       setContributionAmount("");
       refetch();
+      confetti({
+        particleCount: 120,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ["#6366f1", "#8b5cf6", "#3b82f6", "#10b981"],
+      });
     }
   }, [isContributionSuccess, refetch]);
 
@@ -207,6 +215,13 @@ function CampaignDetailPage() {
     claimRefund(campaign.address);
   };
 
+  const handleShare = async () => {
+    const url = window.location.href;
+    await navigator.clipboard.writeText(url);
+    setShareCopied(true);
+    setTimeout(() => setShareCopied(false), 2500);
+  };
+
   // Check if campaign has ended
   const hasEnded = timeRemaining === "Ended";
   const canContribute = campaign.status === "Funding" && !hasEnded && !isCreator;
@@ -251,11 +266,19 @@ function CampaignDetailPage() {
                 <CopyButton text={address || campaign.address} />
               </div>
             </div>
-            <span
-              className={`px-4 py-2 text-sm font-medium rounded-full border ${getStatusBadge()} self-start whitespace-nowrap`}
-            >
-              {campaign.status}
-            </span>
+            <div className="flex items-center gap-3 self-start flex-shrink-0">
+              <button
+                onClick={handleShare}
+                className="px-3 py-2 text-xs font-medium rounded-lg border border-slate-600 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all flex items-center gap-1.5"
+              >
+                {shareCopied ? "✓ Copied!" : "⬆ Share"}
+              </button>
+              <span
+                className={`px-4 py-2 text-sm font-medium rounded-full border ${getStatusBadge()} whitespace-nowrap`}
+              >
+                {campaign.status}
+              </span>
+            </div>
           </div>
         </div>
 
