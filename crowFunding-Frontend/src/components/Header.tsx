@@ -1,10 +1,28 @@
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAccount, useReadContract } from "wagmi";
+import { CONTRACTS, SEPOLIA_CHAIN_ID } from "../contracts/config";
+import { factoryABI } from "../contracts/ABI/FactoryABI";
+import type { Address } from "viem";
 
 
 function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { address: connectedAddress, isConnected } = useAccount();
+
+  const { data: ownerAddress } = useReadContract({
+    address: CONTRACTS.factory as Address,
+    abi: factoryABI,
+    functionName: "owner",
+    chainId: SEPOLIA_CHAIN_ID,
+    query: { enabled: isConnected },
+  });
+
+  const isFactoryOwner =
+    isConnected &&
+    !!ownerAddress &&
+    connectedAddress?.toLowerCase() === (ownerAddress as string).toLowerCase();
   return (
     <header className="border-b border-slate-700 bg-slate-900/95 backdrop-blur-md sticky top-0 z-50 shadow-lg shadow-black/20">
       <div className="container mx-auto px-4 py-4">
@@ -47,6 +65,17 @@ function Header() {
             >
               My Campaigns
             </NavLink>
+            {isFactoryOwner && (
+              <NavLink
+                to="/admin"
+                className={({ isActive }) =>
+                  `text-sm font-medium transition-colors hover:text-purple-400 ${isActive ? 'text-purple-400' : 'text-slate-300'
+                  }`
+                }
+              >
+                Admin ⚙️
+              </NavLink>
+            )}
           </nav>
 
           {/* Desktop Connect Wallet Button */}
@@ -109,6 +138,20 @@ function Header() {
               >
                 My Campaigns
               </NavLink>
+              {isFactoryOwner && (
+                <NavLink
+                  to="/admin"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={({ isActive }) =>
+                    `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive
+                      ? 'bg-purple-500/20 text-purple-400'
+                      : 'text-slate-300 hover:bg-slate-800'
+                    }`
+                  }
+                >
+                  Admin ⚙️
+                </NavLink>
+              )}
               <div className="px-4 py-2">
                 <ConnectButton chainStatus="icon" />
               </div>

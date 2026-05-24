@@ -15,6 +15,7 @@ import HomePage from "./Pages/HomePage.tsx";
 import CreateCampaignPage from "./Pages/CreateCampaignPage.tsx";
 import MyCampaignsPage from "./Pages/MyCampaignsPage.tsx";
 import CampaignDetailPage from "./Pages/CampaignDetailPage.tsx";
+import AdminPage from "./Pages/AdminPage.tsx";
 import { WagmiProvider } from 'wagmi';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -37,6 +38,7 @@ const router = createBrowserRouter(
         path="campaign/:address"
         element={<CampaignDetailPage></CampaignDetailPage>}
       ></Route>
+      <Route path="admin" element={<AdminPage />}></Route>
     </Route>,
   ),
 );
