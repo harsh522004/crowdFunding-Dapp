@@ -3,7 +3,7 @@ import { http } from 'wagmi';
 import { sepolia } from 'wagmi/chains';
 
 export const config = getDefaultConfig({
-  appName: 'CrowdFund DApp',
+  appName: 'Sahyog',
   projectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID as string,
   chains: [sepolia],
   ssr: false,

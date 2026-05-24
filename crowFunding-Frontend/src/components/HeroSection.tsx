@@ -24,7 +24,8 @@ export default function HeroSection() {
         </h1>
 
         <p className="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-          A decentralized crowdfunding platform where contributors earn{" "}
+          <span className="text-white font-medium">Sahyog</span> is a
+          decentralized crowdfunding platform where contributors earn{" "}
           <span className="text-purple-400 font-medium">KARMA tokens</span> for
           every ETH they back. Transparent, trustless, and on-chain.
         </p>

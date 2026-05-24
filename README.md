@@ -1,4 +1,4 @@
-# CrowdFunding DApp
+# Sahyog — Decentralized Crowdfunding DApp
 
 A decentralized crowdfunding platform built on Ethereum that enables users to create campaigns, contribute with ETH, and earn ERC20 token rewards. Built with React, Solidity, and deployed on Sepolia testnet.
 

@@ -5,6 +5,7 @@ import { useAccount, useReadContract } from "wagmi";
 import { CONTRACTS, SEPOLIA_CHAIN_ID } from "../contracts/config";
 import { factoryABI } from "../contracts/ABI/FactoryABI";
 import type { Address } from "viem";
+import logoSrc from "../assets/Logo.png";
 
 
 function Header() {
@@ -28,12 +29,13 @@ function Header() {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-2 group cursor-pointer">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-              <span className="text-white font-bold text-lg">₿</span>
-            </div>
-            <h1 className="text-lg sm:text-xl font-bold text-white">CrowdFund</h1>
-          </div>
+          <NavLink to="/" className="flex items-center group">
+            <img
+              src={logoSrc}
+              alt="Sahyog"
+              className="h-9 w-auto group-hover:opacity-90 transition-opacity duration-200"
+            />
+          </NavLink>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
