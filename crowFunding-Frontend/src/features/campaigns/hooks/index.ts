@@ -9,3 +9,4 @@ export { useCampaignDetails, type UseCampaignDetailsReturn } from "./useCampaign
 export { useFinalizeCampaign, useWithdrawCampaign, useRefundCampaign } from "./useCampaignActions";
 export { useContributorsCount, type UseContributorsCountReturn } from "./useContributorsCount";
 export { useRecentContributions, type UseRecentContributionsReturn, type ContributionRecord } from "./useRecentContributions";
+export { useTokenInfo, type UseTokenInfoReturn } from "./useTokenInfo";
