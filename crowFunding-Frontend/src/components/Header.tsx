@@ -5,7 +5,7 @@ import { useAccount, useReadContract } from "wagmi";
 import { CONTRACTS, SEPOLIA_CHAIN_ID } from "../contracts/config";
 import { factoryABI } from "../contracts/ABI/FactoryABI";
 import type { Address } from "viem";
-import logoSrc from "../assets/Logo.png";
+import SahyogLogo from "./SahyogLogo";
 
 
 function Header() {
@@ -29,12 +29,8 @@ function Header() {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <NavLink to="/" className="flex items-center group">
-            <img
-              src={logoSrc}
-              alt="Sahyog"
-              className="h-9 w-auto group-hover:opacity-90 transition-opacity duration-200"
-            />
+          <NavLink to="/" className="flex items-center hover:opacity-90 transition-opacity duration-200">
+            <SahyogLogo size="md" />
           </NavLink>
 
           {/* Desktop Navigation */}

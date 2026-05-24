@@ -1,6 +1,6 @@
 import { getAddressUrl } from "../utils/etherscan";
 import { CONTRACTS } from "../contracts/config";
-import logoSrc from "../assets/Logo.png";
+import SahyogLogo from "./SahyogLogo";
 
 export default function Footer() {
   return (
@@ -9,7 +9,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
           {/* Brand */}
           <div>
-            <img src={logoSrc} alt="Sahyog" className="h-8 w-auto mb-3" />
+            <div className="mb-3">
+              <SahyogLogo size="sm" />
+            </div>
             <p className="text-xs text-slate-500 leading-relaxed">
               Decentralized crowdfunding on Ethereum. Create campaigns, earn
               token rewards, secured by smart contracts.
