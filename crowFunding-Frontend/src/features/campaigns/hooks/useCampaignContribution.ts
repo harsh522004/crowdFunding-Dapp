@@ -18,7 +18,6 @@ export function useCampaignContribution(){
     const contributeToCampaign = (inputData : ContributionInput)  => {
         const { campaignAddress, amountInEth } = inputData;
         const amountInWei = formatEtherToWei(amountInEth);
-        console.log("Contributing to campaign:", { campaignAddress, amountInEth, amountInWei });
         writeContract({
             address : campaignAddress as Address,
             abi : masterABI,

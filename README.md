@@ -68,7 +68,7 @@ This project is an example of how AI can accelerate learning at each step. I fol
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/crowdFunding-Dapp.git
+   git clone https://github.com/harsh522004/crowdFunding-Dapp.git
    cd crowdFunding-Dapp
    ```
 

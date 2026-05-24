@@ -11,7 +11,6 @@ export function useFinalizeCampaign() {
   });
 
   const finalizeCampaign = (campaignAddress: Address) => {
-    console.log("Finalizing campaign:", campaignAddress);
     writeContract({
       address: campaignAddress,
       abi: masterABI,
@@ -46,7 +45,6 @@ export function useWithdrawCampaign() {
   });
 
   const withdrawFunds = (campaignAddress: Address) => {
-    console.log("Withdrawing funds from campaign:", campaignAddress);
     writeContract({
       address: campaignAddress,
       abi: masterABI,
@@ -81,7 +79,6 @@ export function useRefundCampaign() {
   });
 
   const claimRefund = (campaignAddress: Address) => {
-    console.log("Claiming refund from campaign:", campaignAddress);
     writeContract({
       address: campaignAddress,
       abi: masterABI,

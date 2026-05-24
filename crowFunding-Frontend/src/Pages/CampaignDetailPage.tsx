@@ -20,7 +20,6 @@ import {
   useRefundCampaign,
   useContributorsCount,
   useRecentContributions,
-  type ContributionRecord,
 } from "../features/campaigns/hooks";
 import TransactionButton from "../components/TransactionButton";
 import LoadingSpinner from "../components/LoadingSpinner";
