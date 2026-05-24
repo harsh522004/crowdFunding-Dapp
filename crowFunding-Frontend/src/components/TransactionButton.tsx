@@ -1,4 +1,5 @@
 import LoadingSpinner from './LoadingSpinner';
+import { getTxUrl } from '../utils/etherscan';
 
 
 export type TransactionState = 'idle' | 'preparing' | 'pending' | 'success' | 'error';
@@ -29,6 +30,7 @@ export default function TransactionButton({
     onClick,
     label,
     txState = 'idle',
+    txHash = null,
     error = null,
     preparingText = "Confirming in wallet...",
     pendingText = "Transaction pending...",
@@ -91,29 +93,41 @@ export default function TransactionButton({
     };
 
     return (
-        <button
-            onClick={onClick}
-            disabled={isDisabled}
-            className={`
-        ${fullWidth ? 'w-full' : ''}
-        px-6 py-3 
-        ${getVariantStyles()}
-        text-white font-semibold rounded-lg 
-        transition-all duration-200 
-        border
-        disabled:cursor-not-allowed 
-        disabled:opacity-70
-        hover:scale-[1.02] 
-        active:scale-[0.98]
-        disabled:scale-100
-        shadow-lg 
-        hover:shadow-xl
-        flex items-center justify-center gap-2
-        ${className}
-      `}
-        >
-            {getIcon()}
-            <span>{getCurrentText()}</span>
-        </button>
+        <div className={`${fullWidth ? 'w-full' : 'inline-flex flex-col'} flex flex-col items-center gap-2`}>
+            <button
+                onClick={onClick}
+                disabled={isDisabled}
+                className={`
+          w-full
+          px-6 py-3
+          ${getVariantStyles()}
+          text-white font-semibold rounded-lg
+          transition-all duration-200
+          border
+          disabled:cursor-not-allowed
+          disabled:opacity-70
+          hover:scale-[1.02]
+          active:scale-[0.98]
+          disabled:scale-100
+          shadow-lg
+          hover:shadow-xl
+          flex items-center justify-center gap-2
+          ${className}
+        `}
+            >
+                {getIcon()}
+                <span>{getCurrentText()}</span>
+            </button>
+            {txHash && (txState === 'pending' || txState === 'success') && (
+                <a
+                    href={getTxUrl(txHash)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-400 hover:text-blue-300 underline"
+                >
+                    View on Etherscan ↗
+                </a>
+            )}
+        </div>
     );
 }

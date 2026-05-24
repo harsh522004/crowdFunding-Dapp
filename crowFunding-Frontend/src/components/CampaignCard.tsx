@@ -4,6 +4,8 @@ import {
   shortenAddress,
   calculateProgressPercentage,
 } from "../utils/formatters";
+import { getAddressUrl } from "../utils/etherscan";
+import { CopyButton } from "./CopyButton";
 
 type CampaignCardProps = {
   campaign: CampaignDetailsUI;
@@ -63,9 +65,18 @@ function CampaignCard(props: CampaignCardProps) {
         {/* Address */}
         <div className="mb-4">
           <p className="text-xs text-slate-500 mb-1">Campaign Address</p>
-          <p className="text-xs font-mono text-slate-300">
-            {shortenAddress(props.campaign.address)}
-          </p>
+          <div className="flex items-center gap-2">
+            <a
+              href={getAddressUrl(props.campaign.address)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="text-xs font-mono text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              {shortenAddress(props.campaign.address)}
+            </a>
+            <CopyButton text={props.campaign.address} />
+          </div>
         </div>
 
         {/* Funding Progress */}

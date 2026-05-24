@@ -24,6 +24,8 @@ import {
 } from "../features/campaigns/hooks";
 import TransactionButton from "../components/TransactionButton";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { getAddressUrl } from "../utils/etherscan";
+import { CopyButton } from "../components/CopyButton";
 
 
 // Define campaign status type
@@ -237,9 +239,17 @@ function CampaignDetailPage() {
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">
                 Campaign Details
               </h1>
-              <p className="text-slate-400 font-mono text-xs sm:text-sm break-all">
-                {address || campaign.address}
-              </p>
+              <div className="flex items-center gap-2 flex-wrap mt-1">
+                <a
+                  href={getAddressUrl(address || campaign.address)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 font-mono text-xs sm:text-sm break-all underline"
+                >
+                  {address || campaign.address}
+                </a>
+                <CopyButton text={address || campaign.address} />
+              </div>
             </div>
             <span
               className={`px-4 py-2 text-sm font-medium rounded-full border ${getStatusBadge()} self-start whitespace-nowrap`}
@@ -298,9 +308,17 @@ function CampaignDetailPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-slate-900/50 rounded-lg p-4">
                   <p className="text-xs text-slate-500 mb-1">Creator</p>
-                  <p className="text-sm font-mono text-slate-300">
-                    {shortenAddress(campaign.creator)}
-                  </p>
+                  <div className="flex items-center gap-1 flex-wrap">
+                    <a
+                      href={getAddressUrl(campaign.creator)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-mono text-blue-400 hover:text-blue-300 transition-colors"
+                    >
+                      {shortenAddress(campaign.creator)}
+                    </a>
+                    <CopyButton text={campaign.creator} />
+                  </div>
                   {isCreator && (
                     <span className="inline-block mt-2 px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded">
                       You
