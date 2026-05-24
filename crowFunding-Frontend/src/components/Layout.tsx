@@ -1,14 +1,18 @@
 import { Outlet } from "react-router-dom";
 import Header from "./Header";
+import Footer from "./Footer";
 import { NetworkGuard } from "./NetworkGuard";
 
 function Layout() {
   return (
-    <div>
-      <Header></Header>
-      <NetworkGuard>
-        <Outlet />
-      </NetworkGuard>
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <main className="flex-1">
+        <NetworkGuard>
+          <Outlet />
+        </NetworkGuard>
+      </main>
+      <Footer />
     </div>
   );
 }
